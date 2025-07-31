@@ -123,6 +123,11 @@
   color: white;
 }
 
+.view-history:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
 .action-icon {
   font-size: 3rem;
   margin-bottom: 15px;
@@ -901,5 +906,283 @@ select.form-control {
   
   .checkbox-label {
     font-size: 1rem;
+  }
+}
+
+/* Appointment History Modal Styles */
+.appointment-history-modal {
+  max-width: 800px;
+}
+
+.history-grid {
+  display: grid;
+  gap: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.history-card {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.history-card.completed {
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+}
+
+.history-card.cancelled {
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff8f8 0%, #f8e8e8 100%);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.history-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.history-member {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.history-type-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.scheduled-status {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+}
+
+.completed-status {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+}
+
+.cancelled-status {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+}
+
+.history-details {
+  margin-bottom: 15px;
+}
+
+.history-service {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #3498db;
+  margin: 0 0 8px 0;
+}
+
+.history-datetime {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 8px;
+}
+
+.history-date,
+.history-time {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  color: #5a6c7d;
+}
+
+/* Feedback Section Styles */
+.feedback-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 15px;
+}
+
+.existing-feedback {
+  text-align: left;
+}
+
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rating-label {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  font-size: 1.2rem;
+  color: #ddd;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.feedback-comment {
+  font-style: italic;
+  color: #5a6c7d;
+  margin: 10px 0;
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 3px solid #3498db;
+}
+
+.no-feedback {
+  text-align: center;
+}
+
+.feedback-prompt {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 10px 0;
+}
+
+.pending-feedback {
+  text-align: center;
+  padding: 15px;
+  background: #e8f4fd;
+  border-radius: 8px;
+  margin-top: 15px;
+}
+
+/* Small Buttons */
+.btn-small {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838 0%, #1ca085 100%);
+  transform: translateY(-1px);
+}
+
+/* Feedback Modal Styles */
+.feedback-modal {
+  max-width: 500px;
+}
+
+.feedback-appointment-info {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.feedback-appointment-info h3 {
+  margin: 0 0 5px 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.feedback-appointment-info p {
+  margin: 0;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+/* Rating Input */
+.rating-input {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.star-input {
+  font-size: 2rem;
+  color: #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.star-input:hover,
+.star-input.selected {
+  color: #ffc107;
+  transform: scale(1.1);
+}
+
+.star-input:hover {
+  text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+/* Mobile Responsiveness for History */
+@media (max-width: 768px) {
+  .appointment-history-modal {
+    max-width: 95vw;
+    margin: 20px 10px;
+  }
+  
+  .history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .history-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .history-datetime {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .rating-input {
+    justify-content: center;
+  }
+  
+  .star-input {
+    font-size: 1.5rem;
   }
 }

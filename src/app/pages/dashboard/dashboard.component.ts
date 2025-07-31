@@ -29,6 +29,11 @@ interface Appointment {
   address?: string;
   notes?: string;
   status: 'scheduled' | 'completed' | 'cancelled';
+  feedback?: {
+    rating: number;
+    comment: string;
+    givenAt: string;
+  };
 }
 
 @Component({
@@ -46,15 +51,22 @@ export class DashboardComponent {
   showFamilyModal = false;
   showPetModal = false;
   showAppointmentModal = false;
+  showAppointmentHistoryModal = false;
+  showFeedbackModal = false;
   
   // Editing states
   editingFamilyMember: FamilyMember | null = null;
   editingPet: Pet | null = null;
+  selectedAppointmentForFeedback: Appointment | null = null;
   
   // Form objects
   familyMemberForm: Partial<FamilyMember> = {};
   petForm: Partial<Pet> = {};
   appointmentForm: Partial<Appointment> = {};
+  feedbackForm = {
+    rating: 0,
+    comment: ''
+  };
   
   // ID counters
   private nextFamilyId = 1;
@@ -63,18 +75,18 @@ export class DashboardComponent {
 
   // Available services
   services = [
+    'Child Day Care',
+    'Elder Day Care',
+    'Pet Day Care',
+    'Special Needs Care',
+    'After School Care',
+    'Respite Care',
     'Medical Consultation',
-    'Vaccination',
     'Health Checkup',
-    'Dental Care',
     'Emergency Care',
-    'Physiotherapy',
     'Mental Health Support',
     'Nutrition Counseling',
-    'Senior Care',
-    'Grooming (Pets)',
-    'Training (Pets)',
-    'Boarding (Pets)'
+    'Physiotherapy'
   ];
 
   constructor() {
@@ -244,6 +256,65 @@ export class DashboardComponent {
     return today.toISOString().split('T')[0];
   }
 
+  // Appointment History and Feedback Methods
+  showAppointmentHistory() {
+    this.showAppointmentHistoryModal = true;
+  }
+
+  closeAppointmentHistory() {
+    this.showAppointmentHistoryModal = false;
+  }
+
+  getAllAppointments() {
+    return this.appointments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  getPastAppointments() {
+    const today = new Date().toISOString().split('T')[0];
+    return this.appointments.filter(a => a.date < today || a.status === 'completed').slice(0, 10);
+  }
+
+  openFeedbackModal(appointment: Appointment) {
+    this.selectedAppointmentForFeedback = appointment;
+    this.feedbackForm = {
+      rating: appointment.feedback?.rating || 0,
+      comment: appointment.feedback?.comment || ''
+    };
+    this.showFeedbackModal = true;
+  }
+
+  closeFeedbackModal() {
+    this.showFeedbackModal = false;
+    this.selectedAppointmentForFeedback = null;
+    this.feedbackForm = { rating: 0, comment: '' };
+  }
+
+  setRating(rating: number) {
+    this.feedbackForm.rating = rating;
+  }
+
+  saveFeedback() {
+    if (this.selectedAppointmentForFeedback && this.feedbackForm.rating > 0) {
+      this.selectedAppointmentForFeedback.feedback = {
+        rating: this.feedbackForm.rating,
+        comment: this.feedbackForm.comment,
+        givenAt: new Date().toISOString()
+      };
+      this.selectedAppointmentForFeedback.status = 'completed';
+      this.closeFeedbackModal();
+      alert('Thank you for your feedback!');
+    } else {
+      alert('Please provide a rating before submitting feedback');
+    }
+  }
+
+  markAsCompleted(appointmentId: number) {
+    const appointment = this.appointments.find(a => a.id === appointmentId);
+    if (appointment) {
+      appointment.status = 'completed';
+    }
+  }
+
   // Helper method to add sample data
   private addSampleData() {
     this.familyMembers = [
@@ -271,6 +342,50 @@ export class DashboardComponent {
         breed: 'Golden Retriever',
         age: 3,
         specialCare: 'Needs daily exercise'
+      }
+    ];
+
+    // Add some sample appointments for demonstration
+    this.appointments = [
+      {
+        id: this.nextAppointmentId++,
+        type: 'family',
+        memberId: 1,
+        memberName: 'Sarah Doe',
+        service: 'Elder Day Care',
+        date: '2025-07-25',
+        time: '09:00',
+        pickupDrop: true,
+        address: '123 Main St',
+        status: 'completed',
+        feedback: {
+          rating: 5,
+          comment: 'Excellent service! Very caring staff.',
+          givenAt: '2025-07-25T18:00:00Z'
+        }
+      },
+      {
+        id: this.nextAppointmentId++,
+        type: 'family',
+        memberId: 2,
+        memberName: 'Emma Doe',
+        service: 'After School Care',
+        date: '2025-07-28',
+        time: '15:30',
+        pickupDrop: false,
+        status: 'completed'
+      },
+      {
+        id: this.nextAppointmentId++,
+        type: 'pet',
+        memberId: 1,
+        memberName: 'Buddy',
+        service: 'Pet Day Care',
+        date: '2025-08-02',
+        time: '08:00',
+        pickupDrop: true,
+        address: '123 Main St',
+        status: 'scheduled'
       }
     ];
   }

@@ -35,6 +35,12 @@
         <h3 class="action-title">Appointments</h3>
         <p class="action-description">{{getUpcomingAppointments().length}} upcoming appointments</p>
       </div>
+      
+      <div class="action-card view-history" (click)="showAppointmentHistory()">
+        <div class="action-icon">📋</div>
+        <h3 class="action-title">Appointment History</h3>
+        <p class="action-description">View past appointments and give feedback</p>
+      </div>
     </div>
   </div>
 
@@ -346,5 +352,135 @@
         <button type="submit" class="btn btn-primary">{{editingPet ? 'Update' : 'Add'}} Pet</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Appointment History Modal -->
+<div class="modal" *ngIf="showAppointmentHistoryModal" (click)="closeAppointmentHistory()">
+  <div class="modal-content appointment-history-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Appointment History</h2>
+      <button class="modal-close" (click)="closeAppointmentHistory()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="history-grid" *ngIf="getAllAppointments().length > 0; else noHistory">
+        <div class="history-card" *ngFor="let appointment of getAllAppointments()" 
+             [class.completed]="appointment.status === 'completed'"
+             [class.cancelled]="appointment.status === 'cancelled'">
+          <div class="history-header">
+            <div class="history-info">
+              <h3 class="history-member">{{appointment.memberName}}</h3>
+              <span class="history-type-badge" 
+                    [class.family-badge]="appointment.type === 'family'" 
+                    [class.pet-badge]="appointment.type === 'pet'">
+                {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
+              </span>
+            </div>
+            <span class="status-badge" [class]="appointment.status + '-status'">
+              {{appointment.status | titlecase}}
+            </span>
+          </div>
+          
+          <div class="history-details">
+            <p class="history-service">{{appointment.service}}</p>
+            <div class="history-datetime">
+              <span class="history-date">📅 {{appointment.date}}</span>
+              <span class="history-time">🕐 {{appointment.time}}</span>
+            </div>
+            <div class="history-pickup" *ngIf="appointment.pickupDrop">
+              <span class="pickup-badge">🚗 Pickup & Drop Service</span>
+            </div>
+          </div>
+
+          <div class="feedback-section" *ngIf="appointment.status === 'completed'">
+            <div class="existing-feedback" *ngIf="appointment.feedback; else noFeedback">
+              <div class="rating-display">
+                <span class="rating-label">Your Rating:</span>
+                <div class="stars">
+                  <span *ngFor="let star of [1,2,3,4,5]" 
+                        class="star" 
+                        [class.filled]="star <= appointment.feedback!.rating">★</span>
+                </div>
+              </div>
+              <p class="feedback-comment" *ngIf="appointment.feedback!.comment">
+                "{{appointment.feedback!.comment}}"
+              </p>
+              <button class="btn-small btn-secondary" (click)="openFeedbackModal(appointment)">
+                Edit Feedback
+              </button>
+            </div>
+            
+            <ng-template #noFeedback>
+              <div class="no-feedback">
+                <p class="feedback-prompt">How was your experience?</p>
+                <button class="btn-small btn-primary" (click)="openFeedbackModal(appointment)">
+                  Give Feedback
+                </button>
+              </div>
+            </ng-template>
+          </div>
+
+          <div class="pending-feedback" *ngIf="appointment.status === 'scheduled'">
+            <button class="btn-small btn-success" (click)="markAsCompleted(appointment.id)">
+              Mark as Completed
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noHistory>
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <h3 class="empty-title">No Appointment History</h3>
+          <p class="empty-description">Your completed appointments will appear here</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal" *ngIf="showFeedbackModal" (click)="closeFeedbackModal()">
+  <div class="modal-content feedback-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Rate Your Experience</h2>
+      <button class="modal-close" (click)="closeFeedbackModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <div class="feedback-appointment-info" *ngIf="selectedAppointmentForFeedback">
+        <h3>{{selectedAppointmentForFeedback.service}}</h3>
+        <p>{{selectedAppointmentForFeedback.memberName}} • {{selectedAppointmentForFeedback.date}}</p>
+      </div>
+
+      <form (ngSubmit)="saveFeedback()" #feedbackFormRef="ngForm">
+        <div class="form-group">
+          <label class="form-label">Rating *</label>
+          <div class="rating-input">
+            <span *ngFor="let star of [1,2,3,4,5]" 
+                  class="star-input" 
+                  [class.selected]="star <= feedbackForm.rating"
+                  (click)="setRating(star)">★</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="feedbackComment">Comments (Optional)</label>
+          <textarea 
+            id="feedbackComment" 
+            name="feedbackComment" 
+            [(ngModel)]="feedbackForm.comment" 
+            rows="4" 
+            class="form-control"
+            placeholder="Share your experience with us..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeFeedbackModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Feedback</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
