@@ -1,0 +1,208 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="welcome-section">
+      <h1 class="welcome-title">Welcome to Your Dashboard</h1>
+      <p class="welcome-subtitle">Manage your family members and pets</p>
+    </div>
+    <div class="user-info">
+      <div class="user-avatar">👤</div>
+      <div class="user-details">
+        <span class="user-name">John Doe</span>
+        <span class="user-email">john.doe@example.com</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <h2 class="section-title">Quick Actions</h2>
+    <div class="action-cards">
+      <div class="action-card add-family" (click)="showAddFamilyModal()">
+        <div class="action-icon">👨‍👩‍👧‍👦</div>
+        <h3 class="action-title">Add Family Member</h3>
+        <p class="action-description">Add a new family member to your care profile</p>
+      </div>
+      
+      <div class="action-card add-pet" (click)="showAddPetModal()">
+        <div class="action-icon">🐕</div>
+        <h3 class="action-title">Add Pet</h3>
+        <p class="action-description">Register a new pet for care services</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Management Sections -->
+  <div class="management-sections">
+    <!-- Family Members Section -->
+    <div class="management-section">
+      <div class="section-header">
+        <h2 class="section-title">Family Members</h2>
+        <button class="btn btn-primary" (click)="showAddFamilyModal()">
+          <span class="btn-icon">➕</span>
+          Add Member
+        </button>
+      </div>
+      
+      <div class="members-grid" *ngIf="familyMembers.length > 0; else noFamilyMembers">
+        <div class="member-card" *ngFor="let member of familyMembers">
+          <div class="member-info">
+            <div class="member-avatar">
+              <span class="avatar-text">{{member.name.charAt(0)}}</span>
+            </div>
+            <div class="member-details">
+              <h3 class="member-name">{{member.name}}</h3>
+              <p class="member-relation">{{member.relation}}</p>
+              <p class="member-age">Age: {{member.age}}</p>
+            </div>
+          </div>
+          <div class="member-actions">
+            <button class="btn-icon edit-btn" (click)="editFamilyMember(member)">✏️</button>
+            <button class="btn-icon delete-btn" (click)="deleteFamilyMember(member.id)">🗑️</button>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noFamilyMembers>
+        <div class="empty-state">
+          <div class="empty-icon">👨‍👩‍👧‍👦</div>
+          <h3 class="empty-title">No Family Members Added</h3>
+          <p class="empty-description">Start by adding your family members to create care profiles</p>
+          <button class="btn btn-primary" (click)="showAddFamilyModal()">Add First Member</button>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Pets Section -->
+    <div class="management-section">
+      <div class="section-header">
+        <h2 class="section-title">Pets</h2>
+        <button class="btn btn-primary" (click)="showAddPetModal()">
+          <span class="btn-icon">➕</span>
+          Add Pet
+        </button>
+      </div>
+      
+      <div class="pets-grid" *ngIf="pets.length > 0; else noPets">
+        <div class="pet-card" *ngFor="let pet of pets">
+          <div class="pet-info">
+            <div class="pet-avatar">
+              <span class="avatar-text">{{pet.name.charAt(0)}}</span>
+            </div>
+            <div class="pet-details">
+              <h3 class="pet-name">{{pet.name}}</h3>
+              <p class="pet-type">{{pet.type}} • {{pet.breed}}</p>
+              <p class="pet-age">Age: {{pet.age}}</p>
+            </div>
+          </div>
+          <div class="pet-actions">
+            <button class="btn-icon edit-btn" (click)="editPet(pet)">✏️</button>
+            <button class="btn-icon delete-btn" (click)="deletePet(pet.id)">🗑️</button>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noPets>
+        <div class="empty-state">
+          <div class="empty-icon">🐕</div>
+          <h3 class="empty-title">No Pets Added</h3>
+          <p class="empty-description">Add your pets to access pet care services</p>
+          <button class="btn btn-primary" (click)="showAddPetModal()">Add First Pet</button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Add Family Member Modal -->
+<div class="modal" *ngIf="showFamilyModal" (click)="closeFamilyModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{editingFamilyMember ? 'Edit' : 'Add'}} Family Member</h3>
+      <button class="close-btn" (click)="closeFamilyModal()">✕</button>
+    </div>
+    
+    <form class="modal-form" (ngSubmit)="saveFamilyMember()">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" [(ngModel)]="familyMemberForm.name" name="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Relation</label>
+        <select class="form-select" [(ngModel)]="familyMemberForm.relation" name="relation" required>
+          <option value="">Select Relation</option>
+          <option value="Spouse">Spouse</option>
+          <option value="Child">Child</option>
+          <option value="Parent">Parent</option>
+          <option value="Sibling">Sibling</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input type="number" class="form-input" [(ngModel)]="familyMemberForm.age" name="age" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Medical Conditions (Optional)</label>
+        <textarea class="form-textarea" [(ngModel)]="familyMemberForm.medicalConditions" name="medicalConditions" placeholder="Any medical conditions or special care requirements"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeFamilyModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">{{editingFamilyMember ? 'Update' : 'Add'}} Member</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Pet Modal -->
+<div class="modal" *ngIf="showPetModal" (click)="closePetModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3 class="modal-title">{{editingPet ? 'Edit' : 'Add'}} Pet</h3>
+      <button class="close-btn" (click)="closePetModal()">✕</button>
+    </div>
+    
+    <form class="modal-form" (ngSubmit)="savePet()">
+      <div class="form-group">
+        <label class="form-label">Pet Name</label>
+        <input type="text" class="form-input" [(ngModel)]="petForm.name" name="name" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Pet Type</label>
+        <select class="form-select" [(ngModel)]="petForm.type" name="type" required>
+          <option value="">Select Type</option>
+          <option value="Dog">Dog</option>
+          <option value="Cat">Cat</option>
+          <option value="Bird">Bird</option>
+          <option value="Fish">Fish</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Breed</label>
+        <input type="text" class="form-input" [(ngModel)]="petForm.breed" name="breed" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <input type="number" class="form-input" [(ngModel)]="petForm.age" name="age" required>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label">Special Care Notes (Optional)</label>
+        <textarea class="form-textarea" [(ngModel)]="petForm.specialCare" name="specialCare" placeholder="Any special care requirements or medical conditions"></textarea>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closePetModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">{{editingPet ? 'Update' : 'Add'}} Pet</button>
+      </div>
+    </form>
+  </div>
+</div>
