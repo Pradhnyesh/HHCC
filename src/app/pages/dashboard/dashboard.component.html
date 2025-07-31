@@ -29,6 +29,12 @@
         <h3 class="action-title">Add Pet</h3>
         <p class="action-description">Register a new pet for care services</p>
       </div>
+      
+      <div class="action-card view-appointments">
+        <div class="action-icon">📅</div>
+        <h3 class="action-title">Appointments</h3>
+        <p class="action-description">{{getUpcomingAppointments().length}} upcoming appointments</p>
+      </div>
     </div>
   </div>
 
@@ -57,8 +63,9 @@
             </div>
           </div>
           <div class="member-actions">
-            <button class="btn-icon edit-btn" (click)="editFamilyMember(member)">✏️</button>
-            <button class="btn-icon delete-btn" (click)="deleteFamilyMember(member.id)">🗑️</button>
+            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('family', member.id, member.name)" title="Schedule Appointment">📅</button>
+            <button class="btn-icon edit-btn" (click)="editFamilyMember(member)" title="Edit">✏️</button>
+            <button class="btn-icon delete-btn" (click)="deleteFamilyMember(member.id)" title="Delete">🗑️</button>
           </div>
         </div>
       </div>
@@ -96,8 +103,9 @@
             </div>
           </div>
           <div class="pet-actions">
-            <button class="btn-icon edit-btn" (click)="editPet(pet)">✏️</button>
-            <button class="btn-icon delete-btn" (click)="deletePet(pet.id)">🗑️</button>
+            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('pet', pet.id, pet.name)" title="Schedule Appointment">📅</button>
+            <button class="btn-icon edit-btn" (click)="editPet(pet)" title="Edit">✏️</button>
+            <button class="btn-icon delete-btn" (click)="deletePet(pet.id)" title="Delete">🗑️</button>
           </div>
         </div>
       </div>
@@ -110,6 +118,140 @@
           <button class="btn btn-primary" (click)="showAddPetModal()">Add First Pet</button>
         </div>
       </ng-template>
+    </div>
+
+    <!-- Appointments Section -->
+    <div class="management-section">
+      <div class="section-header">
+        <h2 class="section-title">Upcoming Appointments</h2>
+      </div>
+      
+      <div class="appointments-grid" *ngIf="getUpcomingAppointments().length > 0; else noAppointments">
+        <div class="appointment-card" *ngFor="let appointment of getUpcomingAppointments()">
+          <div class="appointment-info">
+            <div class="appointment-header">
+              <h3 class="appointment-member">{{appointment.memberName}}</h3>
+              <span class="appointment-type-badge" [class.family-badge]="appointment.type === 'family'" [class.pet-badge]="appointment.type === 'pet'">
+                {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
+              </span>
+            </div>
+            <div class="appointment-details">
+              <p class="appointment-service">{{appointment.service}}</p>
+              <div class="appointment-datetime">
+                <span class="appointment-date">📅 {{appointment.date}}</span>
+                <span class="appointment-time">🕐 {{appointment.time}}</span>
+              </div>
+              <div class="appointment-pickup" *ngIf="appointment.pickupDrop">
+                <span class="pickup-badge">🚗 Pickup & Drop Available</span>
+              </div>
+              <p class="appointment-notes" *ngIf="appointment.notes">📝 {{appointment.notes}}</p>
+            </div>
+          </div>
+          <div class="appointment-actions">
+            <button class="btn-icon cancel-btn" (click)="cancelAppointment(appointment.id)" title="Cancel">❌</button>
+            <button class="btn-icon delete-btn" (click)="deleteAppointment(appointment.id)" title="Delete">🗑️</button>
+          </div>
+        </div>
+      </div>
+      
+      <ng-template #noAppointments>
+        <div class="empty-state">
+          <div class="empty-icon">📅</div>
+          <h3 class="empty-title">No Upcoming Appointments</h3>
+          <p class="empty-description">Schedule appointments for your family members or pets</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Appointment Modal -->
+<div class="modal" *ngIf="showAppointmentModal" (click)="closeAppointmentModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Schedule Appointment for {{appointmentForm.memberName}}</h2>
+      <button class="modal-close" (click)="closeAppointmentModal()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <form (ngSubmit)="saveAppointment()" #appointmentFormRef="ngForm">
+        <div class="form-group">
+          <label for="service">Service *</label>
+          <select 
+            id="service" 
+            name="service" 
+            [(ngModel)]="appointmentForm.service" 
+            required 
+            class="form-control">
+            <option value="">Select a service</option>
+            <option *ngFor="let service of services" [value]="service">{{service}}</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="appointmentDate">Date *</label>
+            <input 
+              type="date" 
+              id="appointmentDate" 
+              name="appointmentDate" 
+              [(ngModel)]="appointmentForm.date" 
+              required 
+              class="form-control"
+              [min]="getCurrentDate()">
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentTime">Time *</label>
+            <input 
+              type="time" 
+              id="appointmentTime" 
+              name="appointmentTime" 
+              [(ngModel)]="appointmentForm.time" 
+              required 
+              class="form-control">
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              name="pickupDrop" 
+              [(ngModel)]="appointmentForm.pickupDrop" 
+              class="checkbox-input">
+            <span class="checkbox-custom"></span>
+            🚗 Request Pickup & Drop Service
+          </label>
+        </div>
+
+        <div class="form-group" *ngIf="appointmentForm.pickupDrop">
+          <label for="address">Pickup Address</label>
+          <textarea 
+            id="address" 
+            name="address" 
+            [(ngModel)]="appointmentForm.address" 
+            rows="3" 
+            class="form-control"
+            placeholder="Enter your full address for pickup..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="appointmentNotes">Special Notes</label>
+          <textarea 
+            id="appointmentNotes" 
+            name="appointmentNotes" 
+            [(ngModel)]="appointmentForm.notes" 
+            rows="3" 
+            class="form-control"
+            placeholder="Any special requirements or notes..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeAppointmentModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Schedule Appointment</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

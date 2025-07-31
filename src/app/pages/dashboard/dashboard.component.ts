@@ -17,6 +17,20 @@ interface Pet {
   specialCare?: string;
 }
 
+interface Appointment {
+  id: number;
+  type: 'family' | 'pet';
+  memberId: number;
+  memberName: string;
+  service: string;
+  date: string;
+  time: string;
+  pickupDrop: boolean;
+  address?: string;
+  notes?: string;
+  status: 'scheduled' | 'completed' | 'cancelled';
+}
+
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
@@ -26,10 +40,12 @@ export class DashboardComponent {
   // Data arrays
   familyMembers: FamilyMember[] = [];
   pets: Pet[] = [];
+  appointments: Appointment[] = [];
   
   // Modal states
   showFamilyModal = false;
   showPetModal = false;
+  showAppointmentModal = false;
   
   // Editing states
   editingFamilyMember: FamilyMember | null = null;
@@ -38,10 +54,28 @@ export class DashboardComponent {
   // Form objects
   familyMemberForm: Partial<FamilyMember> = {};
   petForm: Partial<Pet> = {};
+  appointmentForm: Partial<Appointment> = {};
   
   // ID counters
   private nextFamilyId = 1;
   private nextPetId = 1;
+  private nextAppointmentId = 1;
+
+  // Available services
+  services = [
+    'Medical Consultation',
+    'Vaccination',
+    'Health Checkup',
+    'Dental Care',
+    'Emergency Care',
+    'Physiotherapy',
+    'Mental Health Support',
+    'Nutrition Counseling',
+    'Senior Care',
+    'Grooming (Pets)',
+    'Training (Pets)',
+    'Boarding (Pets)'
+  ];
 
   constructor() {
     // Add some sample data for demonstration
@@ -139,6 +173,75 @@ export class DashboardComponent {
     if (confirm('Are you sure you want to delete this pet?')) {
       this.pets = this.pets.filter(p => p.id !== id);
     }
+  }
+
+  // Appointment Management Methods
+  scheduleAppointment(type: 'family' | 'pet', memberId: number, memberName: string) {
+    this.appointmentForm = {
+      type: type,
+      memberId: memberId,
+      memberName: memberName,
+      date: '',
+      time: '',
+      service: '',
+      pickupDrop: false,
+      address: '',
+      notes: '',
+      status: 'scheduled'
+    };
+    this.showAppointmentModal = true;
+  }
+
+  closeAppointmentModal() {
+    this.showAppointmentModal = false;
+    this.appointmentForm = {};
+  }
+
+  saveAppointment() {
+    if (this.appointmentForm.service && this.appointmentForm.date && this.appointmentForm.time) {
+      const newAppointment: Appointment = {
+        id: this.nextAppointmentId++,
+        type: this.appointmentForm.type!,
+        memberId: this.appointmentForm.memberId!,
+        memberName: this.appointmentForm.memberName!,
+        service: this.appointmentForm.service!,
+        date: this.appointmentForm.date!,
+        time: this.appointmentForm.time!,
+        pickupDrop: this.appointmentForm.pickupDrop || false,
+        address: this.appointmentForm.address || '',
+        notes: this.appointmentForm.notes || '',
+        status: 'scheduled'
+      };
+      this.appointments.push(newAppointment);
+      this.closeAppointmentModal();
+      alert('Appointment scheduled successfully!');
+    } else {
+      alert('Please fill in all required fields');
+    }
+  }
+
+  cancelAppointment(id: number) {
+    if (confirm('Are you sure you want to cancel this appointment?')) {
+      const appointment = this.appointments.find(a => a.id === id);
+      if (appointment) {
+        appointment.status = 'cancelled';
+      }
+    }
+  }
+
+  deleteAppointment(id: number) {
+    if (confirm('Are you sure you want to delete this appointment?')) {
+      this.appointments = this.appointments.filter(a => a.id !== id);
+    }
+  }
+
+  getUpcomingAppointments() {
+    return this.appointments.filter(a => a.status === 'scheduled').slice(0, 5);
+  }
+
+  getCurrentDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 
   // Helper method to add sample data
