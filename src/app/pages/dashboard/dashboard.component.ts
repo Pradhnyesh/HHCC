@@ -53,6 +53,7 @@ export class DashboardComponent {
   showAppointmentModal = false;
   showAppointmentHistoryModal = false;
   showFeedbackModal = false;
+  showContactModal = false;
   
   // Editing states
   editingFamilyMember: FamilyMember | null = null;
@@ -66,6 +67,14 @@ export class DashboardComponent {
   feedbackForm = {
     rating: 0,
     comment: ''
+  };
+  contactForm = {
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    urgency: 'normal'
   };
   
   // ID counters
@@ -312,6 +321,42 @@ export class DashboardComponent {
     const appointment = this.appointments.find(a => a.id === appointmentId);
     if (appointment) {
       appointment.status = 'completed';
+    }
+  }
+
+  // Contact Us Methods
+  showContactUs() {
+    this.contactForm = {
+      name: 'John Doe', // Pre-fill with user name
+      email: 'john.doe@example.com', // Pre-fill with user email
+      phone: '',
+      subject: '',
+      message: '',
+      urgency: 'normal'
+    };
+    this.showContactModal = true;
+  }
+
+  closeContactModal() {
+    this.showContactModal = false;
+    this.contactForm = {
+      name: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+      urgency: 'normal'
+    };
+  }
+
+  submitContactForm() {
+    if (this.contactForm.name && this.contactForm.email && this.contactForm.subject && this.contactForm.message) {
+      // In a real application, this would send the message to the admin
+      console.log('Contact form submitted:', this.contactForm);
+      this.closeContactModal();
+      alert('Your message has been sent successfully! Our admin team will contact you within 24 hours.');
+    } else {
+      alert('Please fill in all required fields');
     }
   }
 
