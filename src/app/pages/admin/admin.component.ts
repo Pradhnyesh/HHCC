@@ -86,7 +86,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   selectedService: string = 'all';
   selectedDate: string = '';
   searchQuery: string = '';
-  selectedTimePeriod: string = 'all'; // New time period filter
+  selectedTimePeriod: string = 'today'; // New time period filter
   
   // Pagination
   currentPage: number = 1;
