@@ -251,6 +251,147 @@
       </button>
     </div>
   </div>
+
+  <!-- Tour Request Statistics -->
+  <div class="tour-stats-section">
+    <h2 class="section-title">
+      <span class="section-icon">🏢</span>
+      Tour Request Management
+    </h2>
+    <div class="stats-grid">
+      <div class="stat-card tour-pending">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{tourStats.pending}}</h3>
+          <p class="stat-label">Pending Tours</p>
+        </div>
+      </div>
+      
+      <div class="stat-card tour-confirmed">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{tourStats.confirmed}}</h3>
+          <p class="stat-label">Confirmed Tours</p>
+        </div>
+      </div>
+      
+      <div class="stat-card tour-today">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{tourStats.today}}</h3>
+          <p class="stat-label">Tours Today</p>
+        </div>
+      </div>
+      
+      <div class="stat-card tour-completed">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-content">
+          <h3 class="stat-number">{{tourStats.completed}}</h3>
+          <p class="stat-label">Completed Tours</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tour Requests Section -->
+  <div class="tour-requests-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="section-icon">🏢</span>
+        Tour Requests
+      </h2>
+      
+      <div class="tour-filters">
+        <select [(ngModel)]="selectedTourStatus" (change)="onTourFilterChange()" class="filter-select">
+          <option value="all">All Requests</option>
+          <option value="pending">Pending</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tour-requests-container">
+      <div class="tour-requests-table-container">
+        <table class="tour-requests-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Contact</th>
+              <th>Service Interest</th>
+              <th>Preferred Date/Time</th>
+              <th>People</th>
+              <th>Status</th>
+              <th>Submitted</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tourRequest of filteredTourRequests" class="tour-request-row">
+              <td class="name-cell">
+                <div class="name-info">
+                  <strong>{{tourRequest.firstName}} {{tourRequest.lastName}}</strong>
+                </div>
+              </td>
+              <td class="contact-cell">
+                <div class="contact-info">
+                  <div class="email">📧 {{tourRequest.email}}</div>
+                  <div class="phone">📞 {{tourRequest.phone}}</div>
+                </div>
+              </td>
+              <td class="service-cell">
+                <span class="service-tag">{{tourRequest.serviceInterest || 'General Tour'}}</span>
+              </td>
+              <td class="datetime-cell">
+                <div class="datetime-info">
+                  <div class="date">📅 {{formatTourDate(tourRequest.preferredDate)}}</div>
+                  <div class="time">⏰ {{tourRequest.preferredTime}}</div>
+                </div>
+              </td>
+              <td class="people-cell">
+                <span class="people-count">{{tourRequest.numberOfPeople}}</span>
+              </td>
+              <td class="status-cell">
+                <span class="status-badge" [ngClass]="getTourStatusBadgeClass(tourRequest.status)">
+                  {{tourRequest.status | titlecase}}
+                </span>
+              </td>
+              <td class="submitted-cell">
+                <span class="submitted-time">{{formatNotificationTime(tourRequest.submittedAt)}}</span>
+              </td>
+              <td class="actions-cell">
+                <div class="action-buttons">
+                  <button class="btn btn-small btn-info" (click)="openTourDetailsModal(tourRequest)" title="View Details">
+                    👁️
+                  </button>
+                  <button 
+                    *ngIf="tourRequest.status === 'pending'" 
+                    class="btn btn-small btn-success" 
+                    (click)="openConfirmTourModal(tourRequest)" 
+                    title="Confirm Tour">
+                    ✅
+                  </button>
+                  <button 
+                    *ngIf="tourRequest.status === 'pending' || tourRequest.status === 'confirmed'" 
+                    class="btn btn-small btn-warning" 
+                    (click)="openCancelTourModal(tourRequest)" 
+                    title="Cancel Tour">
+                    ❌
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div *ngIf="filteredTourRequests.length === 0" class="no-tours">
+          <div class="no-tours-icon">🏢</div>
+          <p>No tour requests found for the selected filter.</p>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Appointment Details Modal -->
@@ -376,6 +517,269 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tour Details Modal -->
+<div class="modal-overlay" *ngIf="showTourDetailsModal" (click)="closeTourDetailsModal()">
+  <div class="modal-content tour-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="tour-icon">🏢</span>
+        Tour Request Details
+      </h2>
+      <button class="modal-close" (click)="closeTourDetailsModal()">×</button>
+    </div>
+    
+    <div class="modal-body tour-details" *ngIf="selectedTourRequest">
+      <div class="tour-info-grid">
+        <!-- Personal Information -->
+        <div class="info-section">
+          <h3 class="section-subtitle">👤 Personal Information</h3>
+          <div class="info-item">
+            <span class="info-label">Name:</span>
+            <span class="info-value">{{selectedTourRequest.firstName}} {{selectedTourRequest.lastName}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email:</span>
+            <span class="info-value">{{selectedTourRequest.email}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Phone:</span>
+            <span class="info-value">{{selectedTourRequest.phone}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Preferred Contact:</span>
+            <span class="info-value">{{selectedTourRequest.contactMethod | titlecase}}</span>
+          </div>
+        </div>
+
+        <!-- Tour Information -->
+        <div class="info-section">
+          <h3 class="section-subtitle">🏢 Tour Information</h3>
+          <div class="info-item">
+            <span class="info-label">Service Interest:</span>
+            <span class="info-value">{{selectedTourRequest.serviceInterest || 'General Tour'}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Preferred Date:</span>
+            <span class="info-value">{{formatTourDate(selectedTourRequest.preferredDate)}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Preferred Time:</span>
+            <span class="info-value">{{selectedTourRequest.preferredTime}}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Number of People:</span>
+            <span class="info-value">{{selectedTourRequest.numberOfPeople}}</span>
+          </div>
+        </div>
+
+        <!-- Status Information -->
+        <div class="info-section" *ngIf="selectedTourRequest.status !== 'pending'">
+          <h3 class="section-subtitle">📋 Status Information</h3>
+          <div class="info-item">
+            <span class="info-label">Current Status:</span>
+            <span class="info-value status-badge" [ngClass]="getTourStatusBadgeClass(selectedTourRequest.status)">
+              {{selectedTourRequest.status | titlecase}}
+            </span>
+          </div>
+          <div class="info-item" *ngIf="selectedTourRequest.confirmedDate">
+            <span class="info-label">Confirmed Date:</span>
+            <span class="info-value">{{formatTourDate(selectedTourRequest.confirmedDate)}}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedTourRequest.confirmedTime">
+            <span class="info-label">Confirmed Time:</span>
+            <span class="info-value">{{selectedTourRequest.confirmedTime}}</span>
+          </div>
+          <div class="info-item" *ngIf="selectedTourRequest.assignedStaff">
+            <span class="info-label">Assigned Staff:</span>
+            <span class="info-value">{{selectedTourRequest.assignedStaff}}</span>
+          </div>
+        </div>
+
+        <!-- Special Requests -->
+        <div class="info-section full-width" *ngIf="selectedTourRequest.specialRequests">
+          <h3 class="section-subtitle">💬 Special Requests</h3>
+          <div class="special-requests">{{selectedTourRequest.specialRequests}}</div>
+        </div>
+
+        <!-- Cancellation Information -->
+        <div class="info-section full-width" *ngIf="selectedTourRequest.status === 'cancelled'">
+          <h3 class="section-subtitle">❌ Cancellation Information</h3>
+          <div class="info-item" *ngIf="selectedTourRequest.cancellationReason">
+            <span class="info-label">Reason:</span>
+            <span class="info-value">{{selectedTourRequest.cancellationReason}}</span>
+          </div>
+        </div>
+
+        <!-- Admin Notes -->
+        <div class="info-section full-width" *ngIf="selectedTourRequest.notes">
+          <h3 class="section-subtitle">📝 Admin Notes</h3>
+          <div class="admin-notes">{{selectedTourRequest.notes}}</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <button 
+          *ngIf="selectedTourRequest.status === 'pending'" 
+          class="btn btn-success" 
+          (click)="openConfirmTourModal(selectedTourRequest)">
+          ✅ Confirm Tour
+        </button>
+        <button 
+          *ngIf="selectedTourRequest.status === 'pending' || selectedTourRequest.status === 'confirmed'" 
+          class="btn btn-warning" 
+          (click)="openCancelTourModal(selectedTourRequest)">
+          ❌ Cancel Tour
+        </button>
+        <button class="btn btn-secondary" (click)="closeTourDetailsModal()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Tour Modal -->
+<div class="modal-overlay" *ngIf="showConfirmTourModal" (click)="closeConfirmTourModal()">
+  <div class="modal-content confirm-tour-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="confirm-icon">✅</span>
+        Confirm Tour Request
+      </h2>
+      <button class="modal-close" (click)="closeConfirmTourModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedTourRequest">
+      <div class="confirmation-info">
+        <p>Confirming tour for <strong>{{selectedTourRequest.firstName}} {{selectedTourRequest.lastName}}</strong></p>
+      </div>
+
+      <form class="confirm-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="confirmedDate" class="form-label">Confirmed Date *</label>
+            <input 
+              type="date" 
+              id="confirmedDate" 
+              [(ngModel)]="tourConfirmation.confirmedDate" 
+              name="confirmedDate"
+              class="form-input" 
+              [min]="getTourMinDate()"
+              required>
+          </div>
+          <div class="form-group">
+            <label for="confirmedTime" class="form-label">Confirmed Time *</label>
+            <select 
+              id="confirmedTime" 
+              [(ngModel)]="tourConfirmation.confirmedTime" 
+              name="confirmedTime"
+              class="form-select" 
+              required>
+              <option value="">Select time</option>
+              <option *ngFor="let time of availableTimeSlots" [value]="time">{{time}}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="assignedStaff" class="form-label">Assigned Staff Member *</label>
+          <select 
+            id="assignedStaff" 
+            [(ngModel)]="tourConfirmation.assignedStaff" 
+            name="assignedStaff"
+            class="form-select" 
+            required>
+            <option value="">Select staff member</option>
+            <option *ngFor="let staff of availableStaff" [value]="staff">{{staff}}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmNotes" class="form-label">Additional Notes</label>
+          <textarea 
+            id="confirmNotes" 
+            [(ngModel)]="tourConfirmation.notes" 
+            name="notes"
+            rows="3" 
+            class="form-textarea" 
+            placeholder="Any special arrangements, notes about the tour, etc."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-success" (click)="confirmTourRequest()">
+            ✅ Confirm Tour
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="closeConfirmTourModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Tour Modal -->
+<div class="modal-overlay" *ngIf="showCancelTourModal" (click)="closeCancelTourModal()">
+  <div class="modal-content cancel-tour-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="cancel-icon">❌</span>
+        Cancel Tour Request
+      </h2>
+      <button class="modal-close" (click)="closeCancelTourModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedTourRequest">
+      <div class="cancellation-warning">
+        <p>You are about to cancel the tour for <strong>{{selectedTourRequest.firstName}} {{selectedTourRequest.lastName}}</strong></p>
+        <p class="warning-text">⚠️ This action will notify the client via their preferred contact method.</p>
+      </div>
+
+      <form class="cancel-form">
+        <div class="form-group">
+          <label for="cancellationReason" class="form-label">Reason for Cancellation *</label>
+          <select 
+            id="cancellationReason" 
+            [(ngModel)]="tourCancellation.reason" 
+            name="reason"
+            class="form-select" 
+            required>
+            <option value="">Select cancellation reason</option>
+            <option value="scheduling-conflict">Scheduling Conflict</option>
+            <option value="staff-unavailable">Staff Unavailable</option>
+            <option value="facility-maintenance">Facility Maintenance</option>
+            <option value="emergency">Emergency Situation</option>
+            <option value="client-request">Client Requested Cancellation</option>
+            <option value="no-show">Client No-Show</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="cancellationNotes" class="form-label">Additional Notes</label>
+          <textarea 
+            id="cancellationNotes" 
+            [(ngModel)]="tourCancellation.notes" 
+            name="notes"
+            rows="3" 
+            class="form-textarea" 
+            placeholder="Provide additional details about the cancellation, alternate options offered, etc."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-warning" (click)="cancelTourRequest()">
+            ❌ Cancel Tour
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="closeCancelTourModal()">
+            Keep Tour
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

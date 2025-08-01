@@ -319,7 +319,7 @@
         <h3 class="cta-title">Ready to Experience the HHCC Difference?</h3>
         <p class="cta-description">Join hundreds of families who trust us with their most precious loved ones</p>
         <div class="cta-buttons">
-          <a href="#schedule-tour" class="btn-cta btn-cta-primary">Schedule a Tour</a>
+          <button (click)="openScheduleTourModal()" class="btn-cta btn-cta-primary">Schedule a Tour</button>
           <a href="#get-quote" class="btn-cta btn-cta-secondary">Get a Quote</a>
         </div>
       </div>
@@ -603,6 +603,218 @@
     <div class="modal-footer">
       <button class="btn-modal btn-primary" (click)="getStarted()">Get Started Today</button>
       <button class="btn-modal btn-secondary" (click)="closeLearnMoreModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Tour Modal -->
+<div class="modal-overlay" *ngIf="showScheduleTourModal" (click)="closeScheduleTourModal()">
+  <div class="schedule-tour-modal" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="tour-icon">🏢</span>
+        Schedule Your Facility Tour
+      </h2>
+      <button class="modal-close" (click)="closeScheduleTourModal()">×</button>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="modal-content">
+      <div class="tour-intro">
+        <p class="tour-description">
+          We'd love to show you around our facility! Schedule a personalized tour to see our programs in action, meet our staff, and discover why families choose HHCC for their care needs.
+        </p>
+        <div class="tour-highlights">
+          <div class="highlight-item">
+            <span class="highlight-icon">👀</span>
+            <span>See our facilities</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-icon">👥</span>
+            <span>Meet our staff</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-icon">❓</span>
+            <span>Ask questions</span>
+          </div>
+          <div class="highlight-item">
+            <span class="highlight-icon">📋</span>
+            <span>Learn about programs</span>
+          </div>
+        </div>
+      </div>
+
+      <form class="tour-form" (ngSubmit)="submitTourRequest()">
+        <!-- Personal Information -->
+        <div class="form-section">
+          <h3 class="section-title">Personal Information</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tourFirstName" class="form-label">First Name *</label>
+              <input 
+                type="text" 
+                id="tourFirstName" 
+                [(ngModel)]="tourForm.firstName" 
+                name="firstName"
+                class="form-input" 
+                required>
+            </div>
+            <div class="form-group">
+              <label for="tourLastName" class="form-label">Last Name *</label>
+              <input 
+                type="text" 
+                id="tourLastName" 
+                [(ngModel)]="tourForm.lastName" 
+                name="lastName"
+                class="form-input" 
+                required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tourEmail" class="form-label">Email *</label>
+              <input 
+                type="email" 
+                id="tourEmail" 
+                [(ngModel)]="tourForm.email" 
+                name="email"
+                class="form-input" 
+                required>
+            </div>
+            <div class="form-group">
+              <label for="tourPhone" class="form-label">Phone Number *</label>
+              <input 
+                type="tel" 
+                id="tourPhone" 
+                [(ngModel)]="tourForm.phone" 
+                name="phone"
+                class="form-input" 
+                required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tour Details -->
+        <div class="form-section">
+          <h3 class="section-title">Tour Details</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tourServiceInterest" class="form-label">Service of Interest</label>
+              <select 
+                id="tourServiceInterest" 
+                [(ngModel)]="tourForm.serviceInterest" 
+                name="serviceInterest"
+                class="form-select">
+                <option value="">Select a service</option>
+                <option *ngFor="let service of services" [value]="service">{{service}}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="tourNumberOfPeople" class="form-label">Number of People</label>
+              <select 
+                id="tourNumberOfPeople" 
+                [(ngModel)]="tourForm.numberOfPeople" 
+                name="numberOfPeople"
+                class="form-select">
+                <option value="1">1 person</option>
+                <option value="2">2 people</option>
+                <option value="3">3 people</option>
+                <option value="4">4 people</option>
+                <option value="5">5+ people</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tourPreferredDate" class="form-label">Preferred Date *</label>
+              <input 
+                type="date" 
+                id="tourPreferredDate" 
+                [(ngModel)]="tourForm.preferredDate" 
+                name="preferredDate"
+                class="form-input" 
+                [min]="getMinDate()"
+                [max]="getMaxDate()"
+                required>
+            </div>
+            <div class="form-group">
+              <label for="tourPreferredTime" class="form-label">Preferred Time *</label>
+              <select 
+                id="tourPreferredTime" 
+                [(ngModel)]="tourForm.preferredTime" 
+                name="preferredTime"
+                class="form-select" 
+                required>
+                <option value="">Select a time</option>
+                <option *ngFor="let time of availableTimeSlots" [value]="time">{{time}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="form-section">
+          <h3 class="section-title">Additional Information</h3>
+          <div class="form-group">
+            <label for="tourContactMethod" class="form-label">Preferred Contact Method</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input 
+                  type="radio" 
+                  [(ngModel)]="tourForm.contactMethod" 
+                  name="contactMethod"
+                  value="email">
+                <span class="radio-label">📧 Email</span>
+              </label>
+              <label class="radio-option">
+                <input 
+                  type="radio" 
+                  [(ngModel)]="tourForm.contactMethod" 
+                  name="contactMethod"
+                  value="phone">
+                <span class="radio-label">📞 Phone</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="tourSpecialRequests" class="form-label">Special Requests or Questions</label>
+            <textarea 
+              id="tourSpecialRequests" 
+              [(ngModel)]="tourForm.specialRequests" 
+              name="specialRequests"
+              rows="3" 
+              class="form-textarea" 
+              placeholder="Any specific areas you'd like to see, questions you have, or special accommodations needed..."></textarea>
+          </div>
+        </div>
+
+        <!-- Important Notes -->
+        <div class="tour-notes">
+          <h4 class="notes-title">📝 Important Information</h4>
+          <ul class="notes-list">
+            <li>Tours typically last 30-45 minutes</li>
+            <li>We'll confirm your appointment within 24 hours</li>
+            <li>Feel free to bring any questions you have</li>
+            <li>Tours are available Monday-Friday 9 AM - 5 PM</li>
+            <li>Weekend tours available by special arrangement</li>
+          </ul>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" [disabled]="!isFormValid()">
+            <span class="btn-icon">📅</span>
+            Schedule My Tour
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeScheduleTourModal()">
+            Cancel
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

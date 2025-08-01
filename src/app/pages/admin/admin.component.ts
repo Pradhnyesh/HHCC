@@ -51,6 +51,27 @@ interface Notification {
   type: 'message' | 'inquiry' | 'contact';
 }
 
+interface TourRequest {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  serviceInterest: string;
+  preferredDate: string;
+  preferredTime: string;
+  numberOfPeople: number;
+  specialRequests?: string;
+  contactMethod: 'email' | 'phone';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  submittedAt: string;
+  confirmedDate?: string;
+  confirmedTime?: string;
+  assignedStaff?: string;
+  cancellationReason?: string;
+  notes?: string;
+}
+
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
@@ -82,10 +103,40 @@ export class AdminComponent implements OnInit, OnDestroy {
   unreadNotificationCount = 0;
   hasUnreadNotifications = false;
   
+  // Tour Request states
+  tourRequests: TourRequest[] = [];
+  filteredTourRequests: TourRequest[] = [];
+  selectedTourStatus: string = 'all';
+  showTourDetailsModal = false;
+  showConfirmTourModal = false;
+  showCancelTourModal = false;
+  selectedTourRequest: TourRequest | null = null;
+  
+  // Tour management form data
+  tourConfirmation = {
+    confirmedDate: '',
+    confirmedTime: '',
+    assignedStaff: '',
+    notes: ''
+  };
+  
+  tourCancellation = {
+    reason: '',
+    notes: ''
+  };
+  
   // Statistics
   stats = {
     total: 0,
     scheduled: 0,
+    completed: 0,
+    cancelled: 0,
+    today: 0
+  };
+  
+  tourStats = {
+    pending: 0,
+    confirmed: 0,
     completed: 0,
     cancelled: 0,
     today: 0
@@ -114,6 +165,20 @@ export class AdminComponent implements OnInit, OnDestroy {
     { value: 'quarter', label: 'Current Quarter' },
     { value: 'halfyear', label: 'Current Half Year' },
     { value: 'year', label: 'Current Year' }
+  ];
+
+  availableStaff = [
+    'Sarah Johnson - Director',
+    'Michael Chen - Child Care Supervisor',
+    'Emily Davis - Elder Care Coordinator',
+    'David Rodriguez - Special Needs Specialist',
+    'Lisa Thompson - Operations Manager',
+    'Robert Wilson - Pet Care Supervisor'
+  ];
+
+  availableTimeSlots = [
+    '9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', 
+    '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
   ];
 
   constructor() {
@@ -520,6 +585,7 @@ export class AdminComponent implements OnInit, OnDestroy {
   // Notification Methods
   ngOnInit() {
     this.loadSampleData();
+    this.loadTourRequests();
     this.applyFilters();
     this.calculateStats();
     this.loadNotifications();
@@ -637,5 +703,254 @@ export class AdminComponent implements OnInit, OnDestroy {
     };
     this.notifications.unshift(newNotification);
     this.updateNotificationCounts();
+  }
+
+  // Tour Request Management Methods
+  loadTourRequests() {
+    // Sample tour requests - replace with actual API call
+    this.tourRequests = [
+      {
+        id: 1,
+        firstName: 'Jennifer',
+        lastName: 'Martinez',
+        email: 'jennifer.martinez@email.com',
+        phone: '(555) 123-4567',
+        serviceInterest: 'Child Day Care',
+        preferredDate: '2025-08-05',
+        preferredTime: '10:00 AM',
+        numberOfPeople: 2,
+        specialRequests: 'Would like to see the infant care area specifically.',
+        contactMethod: 'email',
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+      },
+      {
+        id: 2,
+        firstName: 'Robert',
+        lastName: 'Chen',
+        email: 'robert.chen@email.com',
+        phone: '(555) 987-6543',
+        serviceInterest: 'Elder Day Care',
+        preferredDate: '2025-08-06',
+        preferredTime: '2:00 PM',
+        numberOfPeople: 3,
+        specialRequests: 'My mother has mobility issues, need wheelchair accessible tour.',
+        contactMethod: 'phone',
+        status: 'confirmed',
+        submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        confirmedDate: '2025-08-06',
+        confirmedTime: '2:00 PM',
+        assignedStaff: 'Emily Davis - Elder Care Coordinator',
+        notes: 'Wheelchair accessible route planned'
+      },
+      {
+        id: 3,
+        firstName: 'Amanda',
+        lastName: 'Wilson',
+        email: 'amanda.wilson@email.com',
+        phone: '(555) 456-7890',
+        serviceInterest: 'Special Needs Care',
+        preferredDate: '2025-08-04',
+        preferredTime: '11:00 AM',
+        numberOfPeople: 2,
+        specialRequests: 'Our son has autism, would like to see sensory room.',
+        contactMethod: 'email',
+        status: 'cancelled',
+        submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+        cancellationReason: 'Scheduling conflict - family emergency',
+        notes: 'Offered to reschedule, family will contact us later'
+      },
+      {
+        id: 4,
+        firstName: 'Mark',
+        lastName: 'Thompson',
+        email: 'mark.thompson@email.com',
+        phone: '(555) 321-0987',
+        serviceInterest: 'Pet Day Care',
+        preferredDate: '2025-08-07',
+        preferredTime: '3:00 PM',
+        numberOfPeople: 1,
+        contactMethod: 'phone',
+        status: 'pending',
+        submittedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+      }
+    ];
+    
+    this.applyTourFilters();
+    this.calculateTourStats();
+  }
+
+  applyTourFilters() {
+    this.filteredTourRequests = this.tourRequests.filter(request => {
+      if (this.selectedTourStatus === 'all') return true;
+      return request.status === this.selectedTourStatus;
+    });
+  }
+
+  calculateTourStats() {
+    this.tourStats = {
+      pending: this.tourRequests.filter(r => r.status === 'pending').length,
+      confirmed: this.tourRequests.filter(r => r.status === 'confirmed').length,
+      completed: this.tourRequests.filter(r => r.status === 'completed').length,
+      cancelled: this.tourRequests.filter(r => r.status === 'cancelled').length,
+      today: this.tourRequests.filter(r => {
+        const requestDate = new Date(r.preferredDate);
+        const today = new Date();
+        return requestDate.toDateString() === today.toDateString() && r.status === 'confirmed';
+      }).length
+    };
+  }
+
+  onTourFilterChange() {
+    this.applyTourFilters();
+  }
+
+  // Tour Details Modal
+  openTourDetailsModal(tourRequest: TourRequest) {
+    this.selectedTourRequest = tourRequest;
+    this.showTourDetailsModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeTourDetailsModal() {
+    this.showTourDetailsModal = false;
+    this.selectedTourRequest = null;
+    document.body.style.overflow = 'auto';
+  }
+
+  // Tour Confirmation Modal
+  openConfirmTourModal(tourRequest: TourRequest) {
+    this.selectedTourRequest = tourRequest;
+    this.tourConfirmation = {
+      confirmedDate: tourRequest.preferredDate,
+      confirmedTime: tourRequest.preferredTime,
+      assignedStaff: '',
+      notes: ''
+    };
+    this.showConfirmTourModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeConfirmTourModal() {
+    this.showConfirmTourModal = false;
+    this.selectedTourRequest = null;
+    this.resetTourConfirmation();
+    document.body.style.overflow = 'auto';
+  }
+
+  confirmTourRequest() {
+    if (!this.selectedTourRequest) return;
+
+    if (!this.tourConfirmation.confirmedDate || !this.tourConfirmation.confirmedTime || !this.tourConfirmation.assignedStaff) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    // Update the tour request
+    this.selectedTourRequest.status = 'confirmed';
+    this.selectedTourRequest.confirmedDate = this.tourConfirmation.confirmedDate;
+    this.selectedTourRequest.confirmedTime = this.tourConfirmation.confirmedTime;
+    this.selectedTourRequest.assignedStaff = this.tourConfirmation.assignedStaff;
+    this.selectedTourRequest.notes = this.tourConfirmation.notes;
+
+    // Here you would typically make an API call to update the database
+    console.log('Tour confirmed:', this.selectedTourRequest);
+
+    // Refresh data
+    this.applyTourFilters();
+    this.calculateTourStats();
+
+    // Show success message
+    alert(`Tour confirmed for ${this.selectedTourRequest.firstName} ${this.selectedTourRequest.lastName}`);
+
+    this.closeConfirmTourModal();
+  }
+
+  // Tour Cancellation Modal
+  openCancelTourModal(tourRequest: TourRequest) {
+    this.selectedTourRequest = tourRequest;
+    this.tourCancellation = {
+      reason: '',
+      notes: ''
+    };
+    this.showCancelTourModal = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeCancelTourModal() {
+    this.showCancelTourModal = false;
+    this.selectedTourRequest = null;
+    this.resetTourCancellation();
+    document.body.style.overflow = 'auto';
+  }
+
+  cancelTourRequest() {
+    if (!this.selectedTourRequest) return;
+
+    if (!this.tourCancellation.reason) {
+      alert('Please provide a reason for cancellation.');
+      return;
+    }
+
+    // Update the tour request
+    this.selectedTourRequest.status = 'cancelled';
+    this.selectedTourRequest.cancellationReason = this.tourCancellation.reason;
+    if (this.tourCancellation.notes) {
+      this.selectedTourRequest.notes = this.tourCancellation.notes;
+    }
+
+    // Here you would typically make an API call to update the database
+    console.log('Tour cancelled:', this.selectedTourRequest);
+
+    // Refresh data
+    this.applyTourFilters();
+    this.calculateTourStats();
+
+    // Show success message
+    alert(`Tour cancelled for ${this.selectedTourRequest.firstName} ${this.selectedTourRequest.lastName}`);
+
+    this.closeCancelTourModal();
+  }
+
+  resetTourConfirmation() {
+    this.tourConfirmation = {
+      confirmedDate: '',
+      confirmedTime: '',
+      assignedStaff: '',
+      notes: ''
+    };
+  }
+
+  resetTourCancellation() {
+    this.tourCancellation = {
+      reason: '',
+      notes: ''
+    };
+  }
+
+  formatTourDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  }
+
+  getTourStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'pending': return 'status-pending';
+      case 'confirmed': return 'status-confirmed';
+      case 'completed': return 'status-completed';
+      case 'cancelled': return 'status-cancelled';
+      default: return '';
+    }
+  }
+
+  // Get minimum date (today) for tour confirmation
+  getTourMinDate(): string {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 }
