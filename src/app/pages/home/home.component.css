@@ -117,6 +117,7 @@
   display: inline-block;
   min-width: 180px;
   text-align: center;
+  cursor: pointer;
 }
 
 .btn-hero-primary {
