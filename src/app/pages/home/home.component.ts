@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -6,9 +6,41 @@ import { Router } from '@angular/router';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, OnDestroy {
   showLearnMoreModal = false;
   showScheduleTourModal = false;
+  
+  // Testimonial carousel properties
+  currentTestimonial = 0;
+  testimonialInterval: any;
+  
+  testimonials = [
+    {
+      text: "HHCC has been a blessing for our family. The staff treats our children like their own, and we have complete peace of mind knowing they're in such caring hands.",
+      authorName: "Sarah & Michael Johnson",
+      authorDetail: "Parents of 2, Members since 2020"
+    },
+    {
+      text: "My mother loves coming to HHCC every day. The elder care program has given her new friends and activities she enjoys. I'm so grateful for their compassionate staff.",
+      authorName: "David Chen",
+      authorDetail: "Son of Mary Chen, Member since 2019"
+    },
+    {
+      text: "The after-school program has been amazing for Emma. She's learning so much and always comes home excited about her day. The homework help is invaluable!",
+      authorName: "Lisa Rodriguez",
+      authorDetail: "Mother of Emma, Member since 2021"
+    },
+    {
+      text: "Finding quality care for my son with special needs was challenging until we discovered HHCC. Their specialized staff and individualized approach is exceptional.",
+      authorName: "Robert & Angela Williams",
+      authorDetail: "Parents of Alex, Member since 2018"
+    },
+    {
+      text: "Our dog Max absolutely loves his days at HHCC! The pet care team is professional and loving. It's wonderful to have a place we can trust with our furry family member.",
+      authorName: "Jennifer & Mark Thompson",
+      authorDetail: "Pet owners, Members since 2022"
+    }
+  ];
   
   // Schedule Tour Form Data
   tourForm = {
@@ -42,8 +74,15 @@ export class HomeComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
-    // Initialize testimonial carousel
+    // Start testimonial carousel
     this.startTestimonialCarousel();
+  }
+
+  ngOnDestroy() {
+    // Clear interval when component is destroyed
+    if (this.testimonialInterval) {
+      clearInterval(this.testimonialInterval);
+    }
   }
 
   openLearnMoreModal() {
@@ -130,50 +169,27 @@ export class HomeComponent implements OnInit {
   }
 
   private startTestimonialCarousel() {
-    let currentTestimonial = 0;
-    const testimonials = document.querySelectorAll('.testimonial-content');
-    const indicators = document.querySelectorAll('.indicator');
-    
-    if (testimonials.length === 0) return;
-
-    const showTestimonial = (index: number) => {
-      testimonials.forEach((testimonial, i) => {
-        testimonial.classList.remove('active', 'fade-out');
-        if (i === index) {
-          testimonial.classList.add('active');
-        }
-      });
-      
-      indicators.forEach((indicator, i) => {
-        indicator.classList.toggle('active', i === index);
-      });
-    };
-
-    // Auto-rotate testimonials
-    setInterval(() => {
-      const nextTestimonial = (currentTestimonial + 1) % testimonials.length;
-      
-      // Add fade-out class to current testimonial
-      testimonials[currentTestimonial].classList.add('fade-out');
-      
-      setTimeout(() => {
-        showTestimonial(nextTestimonial);
-        currentTestimonial = nextTestimonial;
-      }, 400);
+    // Auto-rotate testimonials every 4 seconds
+    this.testimonialInterval = setInterval(() => {
+      this.nextTestimonial();
     }, 4000);
+  }
 
-    // Initialize first testimonial
-    showTestimonial(0);
+  nextTestimonial() {
+    this.currentTestimonial = (this.currentTestimonial + 1) % this.testimonials.length;
+  }
 
-    // Add click handlers for indicators
-    indicators.forEach((indicator, index) => {
-      indicator.addEventListener('click', () => {
-        testimonials[currentTestimonial].classList.add('fade-out');
-        setTimeout(() => {
-          showTestimonial(index);
-          currentTestimonial = index;
-        }, 400);
-      });
-    });
+  previousTestimonial() {
+    this.currentTestimonial = this.currentTestimonial === 0 
+      ? this.testimonials.length - 1 
+      : this.currentTestimonial - 1;
+  }
+
+  goToTestimonial(index: number) {
+    this.currentTestimonial = index;
+  }
+
+  isActiveTestimonial(index: number): boolean {
+    return this.currentTestimonial === index;
   }
 }

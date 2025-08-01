@@ -247,69 +247,20 @@
         
         <div class="testimonial-highlight">
           <div class="testimonial-carousel">
-            <!-- Testimonial 1 -->
-            <div class="testimonial-content active">
+            <!-- Dynamic Testimonials -->
+            <div class="testimonial-content" 
+                 *ngFor="let testimonial of testimonials; let i = index"
+                 [class.active]="isActiveTestimonial(i)"
+                 [style.display]="isActiveTestimonial(i) ? 'block' : 'none'">
               <p class="testimonial-text">
-                "HHCC has been a blessing for our family. The staff treats our children like their own, and we have complete peace of mind knowing they're in such caring hands."
+                "{{testimonial.text}}"
               </p>
               <div class="testimonial-author">
-                <span class="author-name">- Sarah & Michael Johnson</span>
-                <span class="author-detail">Parents of 2, Members since 2020</span>
+                <span class="author-name">- {{testimonial.authorName}}</span>
+                <span class="author-detail">{{testimonial.authorDetail}}</span>
               </div>
             </div>
 
-            <!-- Testimonial 2 -->
-            <div class="testimonial-content">
-              <p class="testimonial-text">
-                "My mother loves coming to HHCC every day. The elder care program has given her new friends and activities she enjoys. I'm so grateful for their compassionate staff."
-              </p>
-              <div class="testimonial-author">
-                <span class="author-name">- David Chen</span>
-                <span class="author-detail">Son of Mary Chen, Member since 2019</span>
-              </div>
-            </div>
-
-            <!-- Testimonial 3 -->
-            <div class="testimonial-content">
-              <p class="testimonial-text">
-                "The after-school program has been amazing for Emma. She's learning so much and always comes home excited about her day. The homework help is invaluable!"
-              </p>
-              <div class="testimonial-author">
-                <span class="author-name">- Lisa Rodriguez</span>
-                <span class="author-detail">Mother of Emma, Member since 2021</span>
-              </div>
-            </div>
-
-            <!-- Testimonial 4 -->
-            <div class="testimonial-content">
-              <p class="testimonial-text">
-                "Finding quality care for my son with special needs was challenging until we discovered HHCC. Their specialized staff and individualized approach is exceptional."
-              </p>
-              <div class="testimonial-author">
-                <span class="author-name">- Robert & Angela Williams</span>
-                <span class="author-detail">Parents of Alex, Member since 2018</span>
-              </div>
-            </div>
-
-            <!-- Testimonial 5 -->
-            <div class="testimonial-content">
-              <p class="testimonial-text">
-                "Our dog Max absolutely loves his days at HHCC! The pet care team is professional and loving. It's wonderful to have a place we can trust with our furry family member."
-              </p>
-              <div class="testimonial-author">
-                <span class="author-name">- Jennifer & Mark Thompson</span>
-                <span class="author-detail">Pet owners, Members since 2022</span>
-              </div>
-            </div>
-
-            <!-- Testimonial Indicators -->
-            <div class="testimonial-indicators">
-              <span class="indicator active" data-slide="0"></span>
-              <span class="indicator" data-slide="1"></span>
-              <span class="indicator" data-slide="2"></span>
-              <span class="indicator" data-slide="3"></span>
-              <span class="indicator" data-slide="4"></span>
-            </div>
           </div>
         </div>
       </div>
@@ -320,7 +271,7 @@
         <p class="cta-description">Join hundreds of families who trust us with their most precious loved ones</p>
         <div class="cta-buttons">
           <button (click)="openScheduleTourModal()" class="btn-cta btn-cta-primary">Schedule a Tour</button>
-          <a href="#get-quote" class="btn-cta btn-cta-secondary">Get a Quote</a>
+          <!-- <a href="#get-quote" class="btn-cta btn-cta-secondary">Get a Quote</a> -->
         </div>
       </div>
     </div>
