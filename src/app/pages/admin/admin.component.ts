@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 
 interface FamilyMember {
   id: number;
@@ -41,12 +41,22 @@ interface Appointment {
   };
 }
 
+interface Notification {
+  id: number;
+  message: string;
+  senderName?: string;
+  senderEmail?: string;
+  timestamp: string;
+  isRead: boolean;
+  type: 'message' | 'inquiry' | 'contact';
+}
+
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit, OnDestroy {
   appointments: Appointment[] = [];
   filteredAppointments: Appointment[] = [];
   
@@ -65,6 +75,12 @@ export class AdminComponent {
   // Modal states
   showAppointmentDetailsModal = false;
   selectedAppointment: Appointment | null = null;
+  
+  // Notification states
+  notifications: Notification[] = [];
+  showNotifications = false;
+  unreadNotificationCount = 0;
+  hasUnreadNotifications = false;
   
   // Statistics
   stats = {
@@ -499,5 +515,127 @@ export class AdminComponent {
   getSelectedTimePeriodLabel(): string {
     const period = this.timePeriods.find(p => p.value === this.selectedTimePeriod);
     return period ? period.label : 'All Time';
+  }
+
+  // Notification Methods
+  ngOnInit() {
+    this.loadSampleData();
+    this.applyFilters();
+    this.calculateStats();
+    this.loadNotifications();
+    this.setupClickOutsideListener();
+  }
+
+  ngOnDestroy() {
+    document.removeEventListener('click', this.handleClickOutside.bind(this));
+  }
+
+  setupClickOutsideListener() {
+    document.addEventListener('click', this.handleClickOutside.bind(this));
+  }
+
+  handleClickOutside(event: Event) {
+    const target = event.target as HTMLElement;
+    const notificationContainer = target.closest('.notification-container');
+    if (!notificationContainer && this.showNotifications) {
+      this.showNotifications = false;
+    }
+  }
+
+  loadNotifications() {
+    // Sample notifications - replace with actual API call
+    this.notifications = [
+      {
+        id: 1,
+        message: "I'm interested in your elder care services. Could you please provide more information about pricing and availability?",
+        senderName: "Sarah Johnson",
+        senderEmail: "sarah.j@email.com",
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        isRead: false,
+        type: 'inquiry'
+      },
+      {
+        id: 2,
+        message: "Hi, I would like to know about your after school programs for my 8-year-old daughter. What activities do you offer?",
+        senderName: "Mike Chen",
+        senderEmail: "mike.chen@email.com",
+        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
+        isRead: false,
+        type: 'inquiry'
+      },
+      {
+        id: 3,
+        message: "Thank you for the excellent pet care service last week. My dog was very happy and well taken care of!",
+        senderName: "Emily Davis",
+        senderEmail: "emily.d@email.com",
+        timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+        isRead: true,
+        type: 'message'
+      }
+    ];
+    
+    this.updateNotificationCounts();
+  }
+
+  updateNotificationCounts() {
+    this.unreadNotificationCount = this.notifications.filter(n => !n.isRead).length;
+    this.hasUnreadNotifications = this.unreadNotificationCount > 0;
+  }
+
+  toggleNotifications() {
+    this.showNotifications = !this.showNotifications;
+  }
+
+  markAsRead(notificationId: number) {
+    const notification = this.notifications.find(n => n.id === notificationId);
+    if (notification && !notification.isRead) {
+      notification.isRead = true;
+      this.updateNotificationCounts();
+      // Here you would typically make an API call to mark as read in the database
+    }
+  }
+
+  markAllAsRead() {
+    this.notifications.forEach(notification => {
+      notification.isRead = true;
+    });
+    this.updateNotificationCounts();
+    // Here you would typically make an API call to mark all as read in the database
+  }
+
+  formatNotificationTime(timestamp: string): string {
+    const now = new Date();
+    const notificationTime = new Date(timestamp);
+    const diffInMs = now.getTime() - notificationTime.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 1) {
+      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+      return `${diffInMinutes}m ago`;
+    } else if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    } else if (diffInDays < 7) {
+      return `${diffInDays}d ago`;
+    } else {
+      return notificationTime.toLocaleDateString();
+    }
+  }
+
+  viewAllNotifications() {
+    this.showNotifications = false;
+    // Here you could navigate to a dedicated notifications page
+    // or open a more detailed notifications modal
+    console.log('Navigate to all notifications page');
+  }
+
+  // Method to add new notification (call this when new message comes from DB)
+  addNotification(notification: Omit<Notification, 'id'>) {
+    const newNotification: Notification = {
+      ...notification,
+      id: Date.now() // Simple ID generation
+    };
+    this.notifications.unshift(newNotification);
+    this.updateNotificationCounts();
   }
 }
