@@ -28,7 +28,17 @@ interface Appointment {
   pickupDrop: boolean;
   address?: string;
   notes?: string;
-  status: 'scheduled' | 'completed' | 'cancelled';
+  status: 'scheduled' | 'checked-in' | 'in-progress' | 'checked-out' | 'completed' | 'cancelled';
+  checkInTime?: string;
+  checkOutTime?: string;
+  adminNotes?: string;
+  photos?: {
+    id: number;
+    url: string;
+    description: string;
+    uploadedAt: string;
+    uploadedBy: string;
+  }[];
   feedback?: {
     rating: number;
     comment: string;
@@ -54,11 +64,13 @@ export class DashboardComponent {
   showAppointmentHistoryModal = false;
   showFeedbackModal = false;
   showContactModal = false;
+  showViewAppointmentModal = false;
   
   // Editing states
   editingFamilyMember: FamilyMember | null = null;
   editingPet: Pet | null = null;
   selectedAppointmentForFeedback: Appointment | null = null;
+  selectedAppointmentForView: Appointment | null = null;
   
   // Form objects
   familyMemberForm: Partial<FamilyMember> = {};
@@ -257,7 +269,7 @@ export class DashboardComponent {
   }
 
   getUpcomingAppointments() {
-    return this.appointments.filter(a => a.status === 'scheduled').slice(0, 5);
+    return this.appointments.filter(a => a.status === 'scheduled' || a.status === 'checked-in' || a.status === 'in-progress').slice(0, 5);
   }
 
   getCurrentDate(): string {
@@ -360,6 +372,39 @@ export class DashboardComponent {
     }
   }
 
+  viewAppointmentDetails(appointment: Appointment) {
+    this.selectedAppointmentForView = appointment;
+    this.showViewAppointmentModal = true;
+  }
+
+  closeViewAppointmentModal() {
+    this.showViewAppointmentModal = false;
+    this.selectedAppointmentForView = null;
+  }
+
+  getStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'scheduled': return 'badge-scheduled';
+      case 'checked-in': return 'badge-checked-in';
+      case 'in-progress': return 'badge-in-progress';
+      case 'checked-out': return 'badge-checked-out';
+      case 'completed': return 'badge-completed';
+      case 'cancelled': return 'badge-cancelled';
+      default: return 'badge-scheduled';
+    }
+  }
+
+  formatDateTime(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  }
+
   // Helper method to add sample data
   private addSampleData() {
     this.familyMembers = [
@@ -403,6 +448,25 @@ export class DashboardComponent {
         pickupDrop: true,
         address: '123 Main St',
         status: 'completed',
+        checkInTime: '8:55 AM',
+        checkOutTime: '5:10 PM',
+        adminNotes: 'Had a wonderful day participating in art therapy and social activities. Very cooperative and engaged with other participants.',
+        photos: [
+          {
+            id: 1,
+            url: '/assets/sample-care-photo1.jpg',
+            description: 'Participating in art therapy session',
+            uploadedAt: '2025-07-25T10:30:00Z',
+            uploadedBy: 'Care Staff - Maria'
+          },
+          {
+            id: 2,
+            url: '/assets/sample-care-photo2.jpg',
+            description: 'Lunch time with friends',
+            uploadedAt: '2025-07-25T12:15:00Z',
+            uploadedBy: 'Care Staff - John'
+          }
+        ],
         feedback: {
           rating: 5,
           comment: 'Excellent service! Very caring staff.',
@@ -418,7 +482,19 @@ export class DashboardComponent {
         date: '2025-07-28',
         time: '15:30',
         pickupDrop: false,
-        status: 'completed'
+        status: 'completed',
+        checkInTime: '3:25 PM',
+        checkOutTime: '6:00 PM',
+        adminNotes: 'Completed homework on time. Enjoyed recreational activities and made new friends during playtime.',
+        photos: [
+          {
+            id: 3,
+            url: '/assets/sample-school-photo.jpg',
+            description: 'Homework completion session',
+            uploadedAt: '2025-07-28T16:00:00Z',
+            uploadedBy: 'Care Staff - Sarah'
+          }
+        ]
       },
       {
         id: this.nextAppointmentId++,
@@ -430,7 +506,18 @@ export class DashboardComponent {
         time: '08:00',
         pickupDrop: true,
         address: '123 Main St',
-        status: 'scheduled'
+        status: 'in-progress',
+        checkInTime: '7:55 AM',
+        adminNotes: 'Very energetic today! Currently enjoying outdoor play time with other dogs. Had a healthy breakfast.',
+        photos: [
+          {
+            id: 4,
+            url: '/assets/sample-pet-photo.jpg',
+            description: 'Morning playtime in the yard',
+            uploadedAt: '2025-08-02T09:30:00Z',
+            uploadedBy: 'Pet Care Staff - Mike'
+          }
+        ]
       }
     ];
   }

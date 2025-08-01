@@ -139,13 +139,20 @@
       </div>
       
       <div class="appointments-grid" *ngIf="getUpcomingAppointments().length > 0; else noAppointments">
-        <div class="appointment-card" *ngFor="let appointment of getUpcomingAppointments()">
+        <div class="appointment-card clickable-card" 
+             *ngFor="let appointment of getUpcomingAppointments()" 
+             (click)="viewAppointmentDetails(appointment)">
           <div class="appointment-info">
             <div class="appointment-header">
               <h3 class="appointment-member">{{appointment.memberName}}</h3>
-              <span class="appointment-type-badge" [class.family-badge]="appointment.type === 'family'" [class.pet-badge]="appointment.type === 'pet'">
-                {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
-              </span>
+              <div class="appointment-badges">
+                <span class="appointment-type-badge" [class.family-badge]="appointment.type === 'family'" [class.pet-badge]="appointment.type === 'pet'">
+                  {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
+                </span>
+                <span class="status-badge" [class]="getStatusBadgeClass(appointment.status)">
+                  {{appointment.status | titlecase}}
+                </span>
+              </div>
             </div>
             <div class="appointment-details">
               <p class="appointment-service">{{appointment.service}}</p>
@@ -371,9 +378,10 @@
     
     <div class="modal-body">
       <div class="history-grid" *ngIf="getAllAppointments().length > 0; else noHistory">
-        <div class="history-card" *ngFor="let appointment of getAllAppointments()" 
+        <div class="history-card clickable-card" *ngFor="let appointment of getAllAppointments()" 
              [class.completed]="appointment.status === 'completed'"
-             [class.cancelled]="appointment.status === 'cancelled'">
+             [class.cancelled]="appointment.status === 'cancelled'"
+             (click)="viewAppointmentDetails(appointment)">
           <div class="history-header">
             <div class="history-info">
               <h3 class="history-member">{{appointment.memberName}}</h3>
@@ -383,7 +391,7 @@
                 {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
               </span>
             </div>
-            <span class="status-badge" [class]="appointment.status + '-status'">
+            <span class="status-badge" [class]="getStatusBadgeClass(appointment.status)">
               {{appointment.status | titlecase}}
             </span>
           </div>
@@ -399,38 +407,45 @@
             </div>
           </div>
 
-          <div class="feedback-section" *ngIf="appointment.status === 'completed'">
-            <div class="existing-feedback" *ngIf="appointment.feedback; else noFeedback">
-              <div class="rating-display">
-                <span class="rating-label">Your Rating:</span>
-                <div class="stars">
-                  <span *ngFor="let star of [1,2,3,4,5]" 
-                        class="star" 
-                        [class.filled]="star <= appointment.feedback!.rating">★</span>
-                </div>
-              </div>
-              <p class="feedback-comment" *ngIf="appointment.feedback!.comment">
-                "{{appointment.feedback!.comment}}"
-              </p>
-              <button class="btn-small btn-secondary" (click)="openFeedbackModal(appointment)">
-                Edit Feedback
-              </button>
+          <div class="appointment-footer">
+            <!-- View Details is now handled by clicking the card -->
+            <div class="view-details-hint">
+              <span class="detail-icon">👁️</span>
+              <span class="detail-text">Click to view details</span>
             </div>
             
-            <ng-template #noFeedback>
-              <div class="no-feedback">
-                <p class="feedback-prompt">How was your experience?</p>
-                <button class="btn-small btn-primary" (click)="openFeedbackModal(appointment)">
-                  Give Feedback
+            <!-- Feedback section for completed appointments -->
+            <div class="feedback-actions" *ngIf="appointment.status === 'completed'" (click)="$event.stopPropagation()">
+              <div class="existing-feedback" *ngIf="appointment.feedback; else noFeedback">
+                <div class="rating-display">
+                  <span class="rating-label">Rating:</span>
+                  <div class="stars">
+                    <span *ngFor="let star of [1,2,3,4,5]" 
+                          class="star" 
+                          [class.filled]="star <= appointment.feedback!.rating">★</span>
+                  </div>
+                </div>
+                <button class="btn-small btn-secondary" (click)="openFeedbackModal(appointment)">
+                  Edit Feedback
                 </button>
               </div>
-            </ng-template>
-          </div>
+              
+              <ng-template #noFeedback>
+                <div class="no-feedback">
+                  <p class="feedback-prompt">Rate your experience</p>
+                  <button class="btn-small btn-primary" (click)="openFeedbackModal(appointment)">
+                    Give Feedback
+                  </button>
+                </div>
+              </ng-template>
+            </div>
 
-          <div class="pending-feedback" *ngIf="appointment.status === 'scheduled'">
-            <button class="btn-small btn-success" (click)="markAsCompleted(appointment.id)">
-              Mark as Completed
-            </button>
+            <!-- Actions for other statuses -->
+            <div class="other-actions" *ngIf="appointment.status === 'scheduled'" (click)="$event.stopPropagation()">
+              <button class="btn-small btn-success" (click)="markAsCompleted(appointment.id)">
+                Mark as Completed
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -637,6 +652,153 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Appointment Details Modal -->
+<div class="modal" *ngIf="showViewAppointmentModal" (click)="closeViewAppointmentModal()">
+  <div class="modal-content view-appointment-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="appointment-icon">📋</span>
+        Appointment Details - {{selectedAppointmentForView?.memberName}}
+      </h2>
+      <button class="modal-close" (click)="closeViewAppointmentModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedAppointmentForView">
+      <!-- Basic Information -->
+      <div class="detail-section">
+        <h3 class="section-title">📅 Basic Information</h3>
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Service:</span>
+            <span class="detail-value">{{selectedAppointmentForView.service}}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Date & Time:</span>
+            <span class="detail-value">{{selectedAppointmentForView.date}} at {{selectedAppointmentForView.time}}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Type:</span>
+            <span class="detail-value">
+              <span class="type-badge" [class.family-badge]="selectedAppointmentForView.type === 'family'" [class.pet-badge]="selectedAppointmentForView.type === 'pet'">
+                {{selectedAppointmentForView.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{selectedAppointmentForView.type | titlecase}}
+              </span>
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Status:</span>
+            <span class="detail-value">
+              <span class="status-badge" [class]="getStatusBadgeClass(selectedAppointmentForView.status)">
+                {{selectedAppointmentForView.status | titlecase}}
+              </span>
+            </span>
+          </div>
+          <div class="detail-item" *ngIf="selectedAppointmentForView.pickupDrop">
+            <span class="detail-label">Pickup & Drop:</span>
+            <span class="detail-value">
+              <span class="pickup-badge">🚗 Available</span>
+            </span>
+          </div>
+          <div class="detail-item" *ngIf="selectedAppointmentForView.address">
+            <span class="detail-label">Address:</span>
+            <span class="detail-value">{{selectedAppointmentForView.address}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timing Information -->
+      <div class="detail-section" *ngIf="selectedAppointmentForView.checkInTime || selectedAppointmentForView.checkOutTime">
+        <h3 class="section-title">⏰ Check-in/out Times</h3>
+        <div class="timing-info">
+          <div class="timing-item" *ngIf="selectedAppointmentForView.checkInTime">
+            <span class="timing-icon">🟢</span>
+            <span class="timing-label">Check-in:</span>
+            <span class="timing-value">{{selectedAppointmentForView.checkInTime}}</span>
+          </div>
+          <div class="timing-item" *ngIf="selectedAppointmentForView.checkOutTime">
+            <span class="timing-icon">🔴</span>
+            <span class="timing-label">Check-out:</span>
+            <span class="timing-value">{{selectedAppointmentForView.checkOutTime}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Admin Notes -->
+      <div class="detail-section" *ngIf="selectedAppointmentForView.adminNotes">
+        <h3 class="section-title">📝 Care Notes from Staff</h3>
+        <div class="notes-display">
+          <p class="admin-notes">{{selectedAppointmentForView.adminNotes}}</p>
+        </div>
+      </div>
+
+      <!-- Your Notes -->
+      <div class="detail-section" *ngIf="selectedAppointmentForView.notes">
+        <h3 class="section-title">📝 Your Notes</h3>
+        <div class="notes-display">
+          <p class="user-notes">{{selectedAppointmentForView.notes}}</p>
+        </div>
+      </div>
+
+      <!-- Photos -->
+      <div class="detail-section" *ngIf="selectedAppointmentForView.photos && selectedAppointmentForView.photos.length > 0">
+        <h3 class="section-title">📷 Photos from Care Session ({{selectedAppointmentForView.photos.length}})</h3>
+        <div class="photos-gallery">
+          <div class="photo-item" *ngFor="let photo of selectedAppointmentForView.photos">
+            <div class="photo-container">
+              <img [src]="photo.url" [alt]="photo.description" class="care-photo" 
+                   onerror="this.src='/assets/placeholder-image.jpg'">
+              <div class="photo-overlay">
+                <p class="photo-description">{{photo.description}}</p>
+              </div>
+            </div>
+            <div class="photo-meta">
+              <p class="photo-time">📅 {{formatDateTime(photo.uploadedAt)}}</p>
+              <p class="photo-staff">👤 {{photo.uploadedBy}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Photos Message -->
+      <div class="detail-section" *ngIf="!selectedAppointmentForView.photos || selectedAppointmentForView.photos.length === 0">
+        <h3 class="section-title">📷 Photos</h3>
+        <div class="no-photos-message">
+          <span class="no-photos-icon">📷</span>
+          <p>No photos have been uploaded for this appointment yet.</p>
+          <small *ngIf="selectedAppointmentForView.status === 'scheduled'">Photos will be available during or after your care session.</small>
+        </div>
+      </div>
+
+      <!-- Feedback Section for Completed Appointments -->
+      <div class="detail-section" *ngIf="selectedAppointmentForView.feedback && selectedAppointmentForView.status === 'completed'">
+        <h3 class="section-title">⭐ Your Feedback</h3>
+        <div class="feedback-display">
+          <div class="rating-display">
+            <span class="rating-label">Rating:</span>
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" 
+                    class="star" 
+                    [class.filled]="star <= selectedAppointmentForView.feedback!.rating">★</span>
+            </div>
+          </div>
+          <p class="feedback-comment" *ngIf="selectedAppointmentForView.feedback.comment">
+            "{{selectedAppointmentForView.feedback.comment}}"
+          </p>
+          <p class="feedback-date">Given on {{formatDateTime(selectedAppointmentForView.feedback.givenAt)}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeViewAppointmentModal()">Close</button>
+      <button class="btn btn-primary" 
+              *ngIf="selectedAppointmentForView?.status === 'completed' && !selectedAppointmentForView?.feedback"
+              (click)="selectedAppointmentForView && openFeedbackModal(selectedAppointmentForView); closeViewAppointmentModal()">
+        Give Feedback
+      </button>
     </div>
   </div>
 </div>
