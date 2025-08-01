@@ -40,6 +40,20 @@
   margin: 0;
 }
 
+.filter-indicator {
+  color: #667eea;
+  font-size: 0.95rem;
+  margin-left: 10px;
+}
+
+.filter-indicator strong {
+  color: #2c3e50;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f4fd 100%);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
 .header-actions {
   display: flex;
   gap: 15px;
@@ -165,6 +179,17 @@
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Time Period Filter Special Styling */
+#timePeriodFilter {
+  border-color: #667eea;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%);
+}
+
+#timePeriodFilter:focus {
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
 }
 
 /* Table Section */

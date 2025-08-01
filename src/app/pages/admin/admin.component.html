@@ -3,7 +3,12 @@
   <div class="admin-header">
     <div class="header-content">
       <h1 class="admin-title">Admin Dashboard</h1>
-      <p class="admin-subtitle">Manage all appointments and services</p>
+      <p class="admin-subtitle">
+        Manage all appointments and services
+        <span *ngIf="selectedTimePeriod !== 'all'" class="filter-indicator">
+          • Showing data for: <strong>{{getSelectedTimePeriodLabel()}}</strong>
+        </span>
+      </p>
     </div>
     <div class="header-actions">
       <button class="btn btn-secondary" (click)="exportAppointments()">
@@ -54,6 +59,13 @@
     
     <div class="filters-grid">
       <div class="filter-group">
+        <label for="timePeriodFilter">Time Period</label>
+        <select id="timePeriodFilter" [(ngModel)]="selectedTimePeriod" (change)="onFilterChange()" class="filter-select">
+          <option *ngFor="let period of timePeriods" [value]="period.value">{{period.label}}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
         <label for="statusFilter">Status</label>
         <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="onFilterChange()" class="filter-select">
           <option value="all">All Status</option>
@@ -72,7 +84,7 @@
       </div>
 
       <div class="filter-group">
-        <label for="dateFilter">Date</label>
+        <label for="dateFilter">Specific Date</label>
         <input type="date" id="dateFilter" [(ngModel)]="selectedDate" (change)="onFilterChange()" class="filter-input">
       </div>
 

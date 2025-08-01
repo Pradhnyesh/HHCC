@@ -55,6 +55,7 @@ export class AdminComponent {
   selectedService: string = 'all';
   selectedDate: string = '';
   searchQuery: string = '';
+  selectedTimePeriod: string = 'all'; // New time period filter
   
   // Pagination
   currentPage: number = 1;
@@ -89,6 +90,16 @@ export class AdminComponent {
     'Physiotherapy'
   ];
 
+  timePeriods = [
+    { value: 'all', label: 'All Time' },
+    { value: 'today', label: 'Today' },
+    { value: 'week', label: 'Current Week' },
+    { value: 'month', label: 'Current Month' },
+    { value: 'quarter', label: 'Current Quarter' },
+    { value: 'halfyear', label: 'Current Half Year' },
+    { value: 'year', label: 'Current Year' }
+  ];
+
   constructor() {
     this.loadSampleData();
     this.applyFilters();
@@ -96,7 +107,7 @@ export class AdminComponent {
   }
 
   loadSampleData() {
-    // Sample appointments data for admin view
+    // Sample appointments data for admin view with various dates for testing time periods
     this.appointments = [
       {
         id: 1,
@@ -126,7 +137,7 @@ export class AdminComponent {
         memberId: 2,
         memberName: 'Emma Doe',
         service: 'After School Care',
-        date: '2025-08-01',
+        date: '2025-08-01', // Today
         time: '15:30',
         pickupDrop: false,
         status: 'scheduled',
@@ -160,7 +171,7 @@ export class AdminComponent {
         memberId: 3,
         memberName: 'Robert Smith',
         service: 'Medical Consultation',
-        date: '2025-08-01',
+        date: '2025-08-01', // Today
         time: '14:00',
         pickupDrop: false,
         status: 'scheduled',
@@ -207,12 +218,102 @@ export class AdminComponent {
           userEmail: 'david.wilson@example.com',
           userPhone: '+1 (555) 321-0987'
         }
+      },
+      {
+        id: 7,
+        type: 'family',
+        memberId: 6,
+        memberName: 'Tom Brown',
+        service: 'Special Needs Care',
+        date: '2025-06-15', // Previous quarter
+        time: '11:00',
+        pickupDrop: true,
+        address: '789 Pine St, City, State',
+        status: 'completed',
+        userInfo: {
+          userName: 'Lisa Brown',
+          userEmail: 'lisa.brown@example.com',
+          userPhone: '+1 (555) 654-3210'
+        },
+        feedback: {
+          rating: 5,
+          comment: 'Outstanding care and support.',
+          givenAt: '2025-06-15T16:00:00Z'
+        }
+      },
+      {
+        id: 8,
+        type: 'pet',
+        memberId: 2,
+        memberName: 'Whiskers',
+        service: 'Pet Day Care',
+        date: '2024-12-20', // Previous year
+        time: '09:30',
+        pickupDrop: false,
+        status: 'completed',
+        userInfo: {
+          userName: 'Sarah Green',
+          userEmail: 'sarah.green@example.com',
+          userPhone: '+1 (555) 111-2222'
+        },
+        feedback: {
+          rating: 4,
+          comment: 'Cat was well taken care of.',
+          givenAt: '2024-12-20T17:00:00Z'
+        }
+      },
+      {
+        id: 9,
+        type: 'family',
+        memberId: 7,
+        memberName: 'Grace Taylor',
+        service: 'Health Checkup',
+        date: '2025-08-05', // This week
+        time: '10:00',
+        pickupDrop: false,
+        status: 'scheduled',
+        userInfo: {
+          userName: 'Mark Taylor',
+          userEmail: 'mark.taylor@example.com',
+          userPhone: '+1 (555) 333-4444'
+        }
+      },
+      {
+        id: 10,
+        type: 'family',
+        memberId: 8,
+        memberName: 'Oliver Davis',
+        service: 'Mental Health Support',
+        date: '2025-02-10', // Earlier this year but different quarter
+        time: '13:00',
+        pickupDrop: true,
+        address: '321 Cedar Ave, City, State',
+        status: 'completed',
+        userInfo: {
+          userName: 'Amanda Davis',
+          userEmail: 'amanda.davis@example.com',
+          userPhone: '+1 (555) 555-6666'
+        },
+        feedback: {
+          rating: 5,
+          comment: 'Very professional and caring service.',
+          givenAt: '2025-02-10T15:00:00Z'
+        }
       }
     ];
   }
 
   applyFilters() {
     this.filteredAppointments = this.appointments.filter(appointment => {
+      // Time period filter
+      const dateRange = this.getDateRangeForTimePeriod();
+      if (dateRange) {
+        const appointmentDate = new Date(appointment.date);
+        if (appointmentDate < dateRange.start || appointmentDate > dateRange.end) {
+          return false;
+        }
+      }
+
       // Status filter
       if (this.selectedStatus !== 'all' && appointment.status !== this.selectedStatus) {
         return false;
@@ -223,7 +324,7 @@ export class AdminComponent {
         return false;
       }
       
-      // Date filter
+      // Date filter (specific date)
       if (this.selectedDate && appointment.date !== this.selectedDate) {
         return false;
       }
@@ -250,13 +351,28 @@ export class AdminComponent {
   }
 
   calculateStats() {
-    this.stats.total = this.appointments.length;
-    this.stats.scheduled = this.appointments.filter(a => a.status === 'scheduled').length;
-    this.stats.completed = this.appointments.filter(a => a.status === 'completed').length;
-    this.stats.cancelled = this.appointments.filter(a => a.status === 'cancelled').length;
+    // Use filtered appointments for statistics based on time period
+    const appointmentsForStats = this.getAppointmentsForTimePeriod();
+    
+    this.stats.total = appointmentsForStats.length;
+    this.stats.scheduled = appointmentsForStats.filter(a => a.status === 'scheduled').length;
+    this.stats.completed = appointmentsForStats.filter(a => a.status === 'completed').length;
+    this.stats.cancelled = appointmentsForStats.filter(a => a.status === 'cancelled').length;
     
     const today = new Date().toISOString().split('T')[0];
-    this.stats.today = this.appointments.filter(a => a.date === today).length;
+    this.stats.today = appointmentsForStats.filter(a => a.date === today).length;
+  }
+
+  getAppointmentsForTimePeriod(): Appointment[] {
+    const dateRange = this.getDateRangeForTimePeriod();
+    if (!dateRange) {
+      return this.appointments; // Return all appointments if no time filter
+    }
+
+    return this.appointments.filter(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      return appointmentDate >= dateRange.start && appointmentDate <= dateRange.end;
+    });
   }
 
   getPaginatedAppointments() {
@@ -268,6 +384,7 @@ export class AdminComponent {
   onFilterChange() {
     this.currentPage = 1;
     this.applyFilters();
+    this.calculateStats(); // Recalculate stats when filters change
   }
 
   changePage(page: number) {
@@ -304,5 +421,83 @@ export class AdminComponent {
 
   getTodaysDate(): string {
     return new Date().toISOString().split('T')[0];
+  }
+
+  getDateRangeForTimePeriod(): { start: Date; end: Date } | null {
+    if (this.selectedTimePeriod === 'all') {
+      return null; // No date filtering
+    }
+
+    const now = new Date();
+    const start = new Date();
+    const end = new Date();
+
+    switch (this.selectedTimePeriod) {
+      case 'today':
+        start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      case 'week':
+        // Current week (Monday to Sunday)
+        const day = now.getDay();
+        const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+        start.setDate(diff);
+        start.setHours(0, 0, 0, 0);
+        end.setDate(diff + 6);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      case 'month':
+        // Current month
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(end.getMonth() + 1);
+        end.setDate(0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      case 'quarter':
+        // Current quarter
+        const quarter = Math.floor(now.getMonth() / 3);
+        start.setMonth(quarter * 3);
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(quarter * 3 + 3);
+        end.setDate(0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      case 'halfyear':
+        // Current half year
+        const halfYear = Math.floor(now.getMonth() / 6);
+        start.setMonth(halfYear * 6);
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(halfYear * 6 + 6);
+        end.setDate(0);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      case 'year':
+        // Current year
+        start.setMonth(0);
+        start.setDate(1);
+        start.setHours(0, 0, 0, 0);
+        end.setMonth(11);
+        end.setDate(31);
+        end.setHours(23, 59, 59, 999);
+        break;
+      
+      default:
+        return null;
+    }
+
+    return { start, end };
+  }
+
+  getSelectedTimePeriodLabel(): string {
+    const period = this.timePeriods.find(p => p.value === this.selectedTimePeriod);
+    return period ? period.label : 'All Time';
   }
 }
