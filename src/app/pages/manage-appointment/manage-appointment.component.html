@@ -1,0 +1,359 @@
+<div class="manage-appointments-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="page-title">
+      <span class="page-icon">📋</span>
+      Manage Appointments
+    </h1>
+    <p class="page-subtitle">Check-in, check-out, and manage appointment photos</p>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="statusFilter">Status</label>
+        <select id="statusFilter" [(ngModel)]="statusFilter" (change)="onFilterChange()" class="filter-select">
+          <option value="all">All Status</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="checked-in">Checked In</option>
+          <option value="in-progress">In Progress</option>
+          <option value="checked-out">Checked Out</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="dateFilter">Date</label>
+        <input type="date" id="dateFilter" [(ngModel)]="dateFilter" (change)="onFilterChange()" 
+               class="filter-input" [value]="getTodayDate()">
+      </div>
+
+      <div class="filter-group">
+        <label for="searchFilter">Search</label>
+        <input type="text" id="searchFilter" [(ngModel)]="searchQuery" (input)="onFilterChange()" 
+               placeholder="Search by name or service..." class="filter-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointments Table -->
+  <div class="appointments-section">
+    <div class="section-header">
+      <h2 class="section-title">Today's Appointments ({{filteredAppointments.length}})</h2>
+    </div>
+
+    <div class="appointments-grid" *ngIf="filteredAppointments.length > 0; else noAppointments">
+      <div class="appointment-card" *ngFor="let appointment of filteredAppointments" 
+           [class]="'status-' + appointment.status">
+        
+        <!-- Card Header -->
+        <div class="card-header">
+          <div class="member-info">
+            <h3 class="member-name">{{appointment.memberName}}</h3>
+            <p class="service-name">{{appointment.service}}</p>
+            <p class="appointment-time">📅 {{appointment.date}} • 🕐 {{appointment.time}}</p>
+          </div>
+          <div class="status-badge" [class]="getStatusBadgeClass(appointment.status)">
+            {{appointment.status | titlecase}}
+          </div>
+        </div>
+
+        <!-- Check-in/out Times -->
+        <div class="timing-info" *ngIf="appointment.checkInTime || appointment.checkOutTime">
+          <div class="time-item" *ngIf="appointment.checkInTime">
+            <span class="time-label">✅ Checked In:</span>
+            <span class="time-value">{{appointment.checkInTime}}</span>
+          </div>
+          <div class="time-item" *ngIf="appointment.checkOutTime">
+            <span class="time-label">🚪 Checked Out:</span>
+            <span class="time-value">{{appointment.checkOutTime}}</span>
+          </div>
+        </div>
+
+        <!-- Photos Preview -->
+        <div class="photos-preview" *ngIf="appointment.photos.length > 0">
+          <h4 class="photos-title">📷 Photos ({{appointment.photos.length}})</h4>
+          <div class="photos-thumbnails">
+            <img *ngFor="let photo of appointment.photos.slice(0, 3)" 
+                 [src]="photo.url" 
+                 [alt]="photo.description"
+                 class="photo-thumbnail"
+                 (click)="viewPhoto(photo)">
+            <div class="more-photos" *ngIf="appointment.photos.length > 3">
+              +{{appointment.photos.length - 3}} more
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="notes-section" *ngIf="appointment.notes">
+          <p class="notes-text">📝 {{appointment.notes}}</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions">
+          <button class="btn btn-primary" (click)="openManageModal(appointment)">
+            🔧 Manage
+          </button>
+          <button class="btn btn-secondary" (click)="openPhotoUpload(appointment)">
+            📷 Add Photos
+          </button>
+          
+          <!-- Quick Actions -->
+          <button class="btn btn-success" 
+                  *ngIf="appointment.status === 'scheduled'"
+                  (click)="checkIn(appointment)">
+            ✅ Check In
+          </button>
+          <button class="btn btn-warning" 
+                  *ngIf="appointment.status === 'checked-in' || appointment.status === 'in-progress'"
+                  (click)="checkOut(appointment)">
+            🚪 Check Out
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noAppointments>
+      <div class="empty-state">
+        <div class="empty-icon">📋</div>
+        <h3 class="empty-title">No Appointments Found</h3>
+        <p class="empty-description">No appointments match your current filters</p>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Manage Appointment Modal -->
+<div class="modal-overlay" *ngIf="showManageModal" (click)="closeManageModal()">
+  <div class="modal-content manage-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="modal-icon">🔧</span>
+        Manage Appointment - {{selectedAppointment?.memberName}}
+      </h2>
+      <button class="modal-close" (click)="closeManageModal()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedAppointment">
+      <!-- Status Management -->
+      <div class="manage-section">
+        <h3 class="section-subtitle">📊 Status Management</h3>
+        <div class="status-controls">
+          <div class="current-status">
+            <span class="status-label">Current Status:</span>
+            <span class="status-badge" [class]="getStatusBadgeClass(selectedAppointment.status)">
+              {{selectedAppointment.status | titlecase}}
+            </span>
+          </div>
+          
+          <div class="status-actions">
+            <button class="btn btn-success" 
+                    *ngIf="selectedAppointment.status === 'scheduled'"
+                    (click)="checkIn(selectedAppointment)">
+              ✅ Check In
+            </button>
+            <button class="btn btn-info" 
+                    *ngIf="selectedAppointment.status === 'checked-in'"
+                    (click)="updateStatus(selectedAppointment, 'in-progress')">
+              🔄 Mark In Progress
+            </button>
+            <button class="btn btn-warning" 
+                    *ngIf="selectedAppointment.status === 'checked-in' || selectedAppointment.status === 'in-progress'"
+                    (click)="checkOut(selectedAppointment)">
+              🚪 Check Out
+            </button>
+            <button class="btn btn-primary" 
+                    *ngIf="selectedAppointment.status === 'checked-out'"
+                    (click)="updateStatus(selectedAppointment, 'completed')">
+              ✅ Mark Completed
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Appointment Notes -->
+      <div class="manage-section">
+        <h3 class="section-subtitle">📝 Appointment Notes</h3>
+        <div class="notes-management">
+          <textarea 
+            [(ngModel)]="appointmentNotes" 
+            placeholder="Add general notes about this appointment..."
+            class="notes-textarea"
+            rows="4"></textarea>
+          <div class="notes-actions">
+            <button class="btn btn-primary" (click)="saveAppointmentNotes(selectedAppointment)">
+              💾 Save Notes
+            </button>
+          </div>
+        </div>
+        
+        <!-- Current Notes Display -->
+        <div class="current-notes" *ngIf="selectedAppointment.notes">
+          <h4 class="notes-subtitle">Current Notes:</h4>
+          <div class="notes-display">
+            {{selectedAppointment.notes}}
+          </div>
+        </div>
+      </div>
+
+      <!-- Check-in/out Notes -->
+      <div class="manage-section">
+        <h3 class="section-subtitle">📝 Add Notes</h3>
+        <textarea 
+          [(ngModel)]="checkInOutNotes" 
+          placeholder="Add notes for check-in/check-out..."
+          class="notes-textarea"
+          rows="3"></textarea>
+      </div>
+
+      <!-- Check-in/out History -->
+      <div class="manage-section" *ngIf="selectedAppointment.checkInOutLogs.length > 0">
+        <h3 class="section-subtitle">📜 Check-in/out History</h3>
+        <div class="logs-list">
+          <div class="log-item" *ngFor="let log of selectedAppointment.checkInOutLogs">
+            <div class="log-header">
+              <span class="log-action" [class]="'action-' + log.action">
+                {{log.action === 'check-in' ? '✅' : '🚪'}} {{log.action | titlecase}}
+              </span>
+              <span class="log-time">{{formatDate(log.timestamp)}}</span>
+            </div>
+            <div class="log-details">
+              <span class="log-staff">👤 {{log.staffMember}}</span>
+              <p class="log-notes" *ngIf="log.notes">💬 {{log.notes}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos Section -->
+      <div class="manage-section">
+        <h3 class="section-subtitle">📷 Photos ({{selectedAppointment.photos.length}})</h3>
+        <div class="photos-management">
+          <button class="btn btn-secondary" (click)="openPhotoUpload(selectedAppointment)">
+            📷 Add New Photos
+          </button>
+          
+          <div class="photos-grid" *ngIf="selectedAppointment.photos.length > 0">
+            <div class="photo-item" *ngFor="let photo of selectedAppointment.photos">
+              <img [src]="photo.url" [alt]="photo.description" class="photo-preview">
+              <div class="photo-overlay">
+                <button class="btn btn-sm btn-info" (click)="viewPhoto(photo)">👁️</button>
+                <button class="btn btn-sm btn-danger" (click)="deletePhoto(selectedAppointment, photo.id)">🗑️</button>
+              </div>
+              <p class="photo-description">{{photo.description}}</p>
+            </div>
+          </div>
+          
+          <div class="no-photos" *ngIf="selectedAppointment.photos.length === 0">
+            <p>No photos uploaded yet</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeManageModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo Upload Modal -->
+<div class="modal-overlay" *ngIf="showPhotoUploadModal" (click)="closePhotoUpload()">
+  <div class="modal-content photo-upload-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="modal-icon">📷</span>
+        Upload Photos - {{selectedAppointment?.memberName}}
+      </h2>
+      <button class="modal-close" (click)="closePhotoUpload()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- File Selection -->
+      <div class="upload-section">
+        <h3 class="section-subtitle">📁 Select Photos</h3>
+        <div class="file-input-wrapper">
+          <input type="file" 
+                 id="photoInput" 
+                 multiple 
+                 accept="image/*" 
+                 (change)="onFileSelected($event)"
+                 class="file-input">
+          <label for="photoInput" class="file-input-label">
+            📷 Choose Photos
+          </label>
+        </div>
+        
+        <!-- Selected Files Preview -->
+        <div class="selected-files" *ngIf="selectedFiles.length > 0">
+          <h4>Selected Files ({{selectedFiles.length}})</h4>
+          <div class="file-list">
+            <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+              <span class="file-name">{{file.name}}</span>
+              <button class="btn btn-sm btn-danger" (click)="removeFile(i)">×</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo Description -->
+      <div class="upload-section">
+        <h3 class="section-subtitle">📝 Photo Description</h3>
+        <textarea 
+          [(ngModel)]="photoDescription" 
+          placeholder="Add description for these photos..."
+          class="description-textarea"
+          rows="3"></textarea>
+      </div>
+
+      <!-- Upload Progress -->
+      <div class="upload-section" *ngIf="isUploading">
+        <h3 class="section-subtitle">⏳ Uploading...</h3>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        </div>
+        <p class="progress-text">{{uploadProgress}}%</p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-primary" 
+              (click)="uploadPhotos()" 
+              [disabled]="selectedFiles.length === 0 || isUploading">
+        📤 Upload Photos
+      </button>
+      <button class="btn btn-secondary" (click)="closePhotoUpload()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Photo View Modal -->
+<div class="modal-overlay" *ngIf="showPhotoViewModal" (click)="closePhotoView()">
+  <div class="modal-content photo-view-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <span class="modal-icon">🖼️</span>
+        Photo Details
+      </h2>
+      <button class="modal-close" (click)="closePhotoView()">×</button>
+    </div>
+    
+    <div class="modal-body" *ngIf="selectedPhoto">
+      <div class="photo-view">
+        <img [src]="selectedPhoto.url" [alt]="selectedPhoto.description" class="full-photo">
+        <div class="photo-details">
+          <p class="photo-description"><strong>Description:</strong> {{selectedPhoto.description}}</p>
+          <p class="photo-uploaded"><strong>Uploaded:</strong> {{formatDate(selectedPhoto.uploadedAt)}}</p>
+          <p class="photo-uploader"><strong>Uploaded by:</strong> {{selectedPhoto.uploadedBy}}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closePhotoView()">Close</button>
+    </div>
+  </div>
+</div>

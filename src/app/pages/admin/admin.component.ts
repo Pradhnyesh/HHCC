@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 
 interface FamilyMember {
   id: number;
@@ -181,7 +182,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
   ];
 
-  constructor() {
+  constructor(private router: Router) {
     this.loadSampleData();
     this.applyFilters();
     this.calculateStats();
@@ -498,6 +499,10 @@ export class AdminComponent implements OnInit, OnDestroy {
     // This would typically export to CSV or Excel
     console.log('Exporting appointments:', this.filteredAppointments);
     alert('Export functionality would be implemented here');
+  }
+
+  navigateToManageAppointments() {
+    this.router.navigate(['/manage-appointments']);
   }
 
   getTodaysDate(): string {
