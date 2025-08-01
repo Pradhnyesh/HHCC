@@ -100,6 +100,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
+  navigateToDashboard() {
+    this.router.navigate(['/dashboard']);
+  }
+
   // Schedule Tour Modal Methods
   openScheduleTourModal() {
     this.showScheduleTourModal = true;
