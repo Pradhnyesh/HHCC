@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -6,10 +7,28 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
+  showLearnMoreModal = false;
+
+  constructor(private router: Router) {}
 
   ngOnInit() {
     // Initialize testimonial carousel
     this.startTestimonialCarousel();
+  }
+
+  openLearnMoreModal() {
+    this.showLearnMoreModal = true;
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  closeLearnMoreModal() {
+    this.showLearnMoreModal = false;
+    document.body.style.overflow = 'auto'; // Restore scrolling
+  }
+
+  getStarted() {
+    this.closeLearnMoreModal();
+    this.router.navigate(['/login']);
   }
 
   private startTestimonialCarousel() {

@@ -21,7 +21,7 @@
       </div>
       <div class="hero-buttons">
         <a href="#enroll" class="btn-hero btn-hero-primary">Enroll Your Loved One</a>
-        <a href="#learn-more" class="btn-hero btn-hero-secondary">Learn More</a>
+        <button (click)="openLearnMoreModal()" class="btn-hero btn-hero-secondary">Learn More</button>
       </div>
     </div>
   </div>
@@ -434,3 +434,175 @@
     </div>
   </div>
 </section>
+
+<!-- Learn More Modal -->
+<div class="modal-overlay" *ngIf="showLearnMoreModal" (click)="closeLearnMoreModal()">
+  <div class="learn-more-modal" (click)="$event.stopPropagation()">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2 class="modal-title">About Helping Hands Community Care</h2>
+      <button class="modal-close" (click)="closeLearnMoreModal()">×</button>
+    </div>
+
+    <!-- Modal Content -->
+    <div class="modal-content">
+      <!-- Mission & Vision -->
+      <div class="modal-section">
+        <h3 class="section-title">🎯 Our Mission</h3>
+        <p class="section-text">
+          To provide exceptional, compassionate care services that nurture every member of our community - from the youngest children to beloved seniors and furry family members. We believe in creating a supportive environment where everyone can thrive with dignity, respect, and love.
+        </p>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="section-title">🌟 Our Vision</h3>
+        <p class="section-text">
+          To be the most trusted and beloved community care provider, setting the standard for quality, compassion, and innovation in family-centered care services. We envision a community where every family has access to reliable, affordable, and exceptional care for their loved ones.
+        </p>
+      </div>
+
+      <!-- Core Values -->
+      <div class="modal-section">
+        <h3 class="section-title">💖 Our Core Values</h3>
+        <div class="values-grid">
+          <div class="value-item">
+            <div class="value-icon">🤝</div>
+            <h4 class="value-title">Trust & Integrity</h4>
+            <p class="value-description">Building lasting relationships through honest communication and reliable care.</p>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">❤️</div>
+            <h4 class="value-title">Compassionate Care</h4>
+            <p class="value-description">Treating every individual with kindness, empathy, and genuine concern for their wellbeing.</p>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🌟</div>
+            <h4 class="value-title">Excellence</h4>
+            <p class="value-description">Continuously improving our services and exceeding expectations in everything we do.</p>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🏘️</div>
+            <h4 class="value-title">Community Focus</h4>
+            <p class="value-description">Understanding and responding to the unique needs of our local community.</p>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🔒</div>
+            <h4 class="value-title">Safety & Security</h4>
+            <p class="value-description">Maintaining the highest standards of safety and security for all in our care.</p>
+          </div>
+          <div class="value-item">
+            <div class="value-icon">🌈</div>
+            <h4 class="value-title">Inclusivity</h4>
+            <p class="value-description">Welcoming and celebrating diversity in all its forms within our community.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- What Makes Us Different -->
+      <div class="modal-section">
+        <h3 class="section-title">⭐ What Makes Us Different</h3>
+        <div class="differences-list">
+          <div class="difference-item">
+            <span class="difference-icon">🎓</span>
+            <div class="difference-content">
+              <h4 class="difference-title">Highly Trained Staff</h4>
+              <p class="difference-text">Our caregivers undergo extensive training, background checks, and continuous education to provide the best possible care.</p>
+            </div>
+          </div>
+          <div class="difference-item">
+            <span class="difference-icon">📋</span>
+            <div class="difference-content">
+              <h4 class="difference-title">Individualized Care Plans</h4>
+              <p class="difference-text">Every person receives a customized care plan tailored to their specific needs, preferences, and goals.</p>
+            </div>
+          </div>
+          <div class="difference-item">
+            <span class="difference-icon">📱</span>
+            <div class="difference-content">
+              <h4 class="difference-title">Technology Integration</h4>
+              <p class="difference-text">Real-time updates, digital communication, and modern systems keep families connected and informed.</p>
+            </div>
+          </div>
+          <div class="difference-item">
+            <span class="difference-icon">🏠</span>
+            <div class="difference-content">
+              <h4 class="difference-title">Home-Like Environment</h4>
+              <p class="difference-text">Our facilities are designed to feel warm, welcoming, and comfortable - like a second home.</p>
+            </div>
+          </div>
+          <div class="difference-item">
+            <span class="difference-icon">💰</span>
+            <div class="difference-content">
+              <h4 class="difference-title">Transparent Pricing</h4>
+              <p class="difference-text">No hidden fees, flexible payment options, and financial assistance programs for qualifying families.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Our Story -->
+      <div class="modal-section">
+        <h3 class="section-title">📖 Our Story</h3>
+        <p class="section-text">
+          Founded in 2009 by a group of passionate community members, Helping Hands Community Care began as a small daycare center with a big dream. Our founders, Sarah Martinez and Dr. James Wilson, recognized the growing need for comprehensive, family-centered care services in our community.
+        </p>
+        <p class="section-text">
+          What started as a 20-child daycare has grown into a full-service community care center serving over 500 families. Despite our growth, we've never lost sight of our core mission: treating every person in our care like family and providing services that make a real difference in people's lives.
+        </p>
+        <p class="section-text">
+          Today, we're proud to be recognized as the premier care provider in our community, with numerous awards for excellence in care, innovation in programming, and outstanding community service.
+        </p>
+      </div>
+
+      <!-- Key Statistics -->
+      <div class="modal-section">
+        <h3 class="section-title">📊 By The Numbers</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-number">15+</div>
+            <div class="stat-label">Years of Service</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Families Served</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">50+</div>
+            <div class="stat-label">Certified Staff</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Satisfaction Rate</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">12</div>
+            <div class="stat-label">Service Programs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Emergency Support</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accreditations & Certifications -->
+      <div class="modal-section">
+        <h3 class="section-title">🏆 Accreditations & Awards</h3>
+        <div class="accreditations-list">
+          <div class="accreditation-item">✅ Licensed by State Department of Human Services</div>
+          <div class="accreditation-item">✅ Accredited by National Association for the Education of Young Children (NAEYC)</div>
+          <div class="accreditation-item">✅ Certified by Commission on Accreditation of Rehabilitation Facilities (CARF)</div>
+          <div class="accreditation-item">✅ 2024 Community Choice Award Winner</div>
+          <div class="accreditation-item">✅ 2023 Excellence in Elder Care Award</div>
+          <div class="accreditation-item">✅ Better Business Bureau A+ Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button class="btn-modal btn-primary" (click)="getStarted()">Get Started Today</button>
+      <button class="btn-modal btn-secondary" (click)="closeLearnMoreModal()">Close</button>
+    </div>
+  </div>
+</div>
