@@ -948,6 +948,22 @@ export class AdminComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Update tour status
+  updateTourStatus(tourId: number, newStatus: string): void {
+    const tourIndex = this.tourRequests.findIndex(tour => tour.id === tourId);
+    if (tourIndex !== -1) {
+      this.tourRequests[tourIndex].status = newStatus as 'pending' | 'confirmed' | 'cancelled' | 'completed';
+      
+      // Update statistics
+      this.calculateTourStats();
+      
+      // Apply current filters
+      this.onTourFilterChange();
+      
+      console.log(`Tour ${tourId} status updated to ${newStatus}`);
+    }
+  }
+
   // Get minimum date (today) for tour confirmation
   getTourMinDate(): string {
     const today = new Date();

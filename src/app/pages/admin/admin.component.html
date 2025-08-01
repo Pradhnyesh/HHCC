@@ -324,7 +324,6 @@
               <th>People</th>
               <th>Status</th>
               <th>Submitted</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -353,33 +352,19 @@
                 <span class="people-count">{{tourRequest.numberOfPeople}}</span>
               </td>
               <td class="status-cell">
-                <span class="status-badge" [ngClass]="getTourStatusBadgeClass(tourRequest.status)">
-                  {{tourRequest.status | titlecase}}
-                </span>
+                <select 
+                  [(ngModel)]="tourRequest.status" 
+                  (change)="updateTourStatus(tourRequest.id, tourRequest.status)"
+                  class="status-dropdown"
+                  [ngClass]="getTourStatusBadgeClass(tourRequest.status)">
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="completed">Completed</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
               </td>
               <td class="submitted-cell">
                 <span class="submitted-time">{{formatNotificationTime(tourRequest.submittedAt)}}</span>
-              </td>
-              <td class="actions-cell">
-                <div class="action-buttons">
-                  <button class="btn btn-small btn-info" (click)="openTourDetailsModal(tourRequest)" title="View Details">
-                    👁️
-                  </button>
-                  <button 
-                    *ngIf="tourRequest.status === 'pending'" 
-                    class="btn btn-small btn-success" 
-                    (click)="openConfirmTourModal(tourRequest)" 
-                    title="Confirm Tour">
-                    ✅
-                  </button>
-                  <button 
-                    *ngIf="tourRequest.status === 'pending' || tourRequest.status === 'confirmed'" 
-                    class="btn btn-small btn-warning" 
-                    (click)="openCancelTourModal(tourRequest)" 
-                    title="Cancel Tour">
-                    ❌
-                  </button>
-                </div>
               </td>
             </tr>
           </tbody>
