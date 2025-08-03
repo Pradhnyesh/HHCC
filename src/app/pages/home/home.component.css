@@ -731,6 +731,21 @@
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
+.form-submit-btn:disabled,
+.form-submit-btn.disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-submit-btn:disabled:hover,
+.form-submit-btn.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .hero-title {

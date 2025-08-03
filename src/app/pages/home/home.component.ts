@@ -56,6 +56,16 @@ export class HomeComponent implements OnInit, OnDestroy {
     contactMethod: 'email'
   };
 
+  // Contact Form Data
+  contactForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    service: '',
+    message: ''
+  };
+
   availableTimeSlots = [
     '9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', 
     '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
@@ -195,5 +205,44 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   isActiveTestimonial(index: number): boolean {
     return this.currentTestimonial === index;
+  }
+
+  // Contact Form Methods
+  isContactFormValid(): boolean {
+    return !!(
+      this.contactForm.firstName.trim() &&
+      this.contactForm.lastName.trim() &&
+      this.contactForm.email.trim() &&
+      this.contactForm.phone.trim() &&
+      this.contactForm.service.trim() &&
+      this.contactForm.message.trim()
+    );
+  }
+
+  submitContactForm() {
+    if (!this.isContactFormValid()) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    // Here you would typically send the data to your backend API
+    console.log('Contact form submitted:', this.contactForm);
+    
+    // Show success message
+    alert('Thank you! Your message has been sent successfully. We will get back to you soon.');
+    
+    // Reset form
+    this.resetContactForm();
+  }
+
+  resetContactForm() {
+    this.contactForm = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      service: '',
+      message: ''
+    };
   }
 }
