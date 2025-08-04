@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { ContactUsService } from '../../../services/contact-us.service';
 
 @Component({
   selector: 'app-home',
@@ -81,7 +82,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     'General Tour'
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private contactUsService: ContactUsService) {}
 
   ngOnInit() {
     // Start testimonial carousel
@@ -225,14 +226,27 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Here you would typically send the data to your backend API
-    console.log('Contact form submitted:', this.contactForm);
-    
-    // Show success message
-    alert('Thank you! Your message has been sent successfully. We will get back to you soon.');
-    
-    // Reset form
-    this.resetContactForm();
+    // Call the sendMessage method
+    this.sendMessage();
+  }
+
+  sendMessage() {
+    // Call the ContactUsService to submit the form data
+    console.log("Checking contact form submission data:", this.contactForm);
+    this.contactUsService.submitContactForm(this.contactForm).subscribe({
+      next: (response) => {
+        console.log('Contact form submitted successfully:', response);
+        // Show success message
+        alert('Thank you! Your message has been sent successfully. We will get back to you soon.');
+        // Reset form
+        this.resetContactForm();
+      },
+      error: (error) => {
+        console.error('Error submitting contact form:', error);
+        // Show error message
+        alert('Sorry, there was an error sending your message. Please try again later.');
+      }
+    });
   }
 
   resetContactForm() {
