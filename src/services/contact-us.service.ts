@@ -11,4 +11,8 @@ export class ContactUsService {
   submitContactForm(formData: any) {
     return this.http.post('http://localhost:8080/contactus/getintouch', formData, {responseType : 'text'});
   }
+
+  scheduleTour(tourData : any) {
+    return this.http.post('http://localhost:8080/contactus/scheduletour', tourData, {responseType : 'text'});
+  }
 }

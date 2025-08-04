@@ -44,18 +44,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   ];
   
   // Schedule Tour Form Data
-  tourForm = {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    serviceInterest: '',
-    preferredDate: '',
-    preferredTime: '',
-    numberOfPeople: 1,
-    specialRequests: '',
-    contactMethod: 'email'
-  };
+    tourForm = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      serviceName: '',
+      preferredDate: '',
+      preferredTime: '',
+      numberOfPeople: 1,
+      noteOrQuestion: '',
+      preferredContactMode: 'email'
+    };
 
   // Contact Form Data
   contactForm = {
@@ -132,13 +132,13 @@ export class HomeComponent implements OnInit, OnDestroy {
       firstName: '',
       lastName: '',
       email: '',
-      phone: '',
-      serviceInterest: '',
+      phoneNumber: '',
+      serviceName: '',
       preferredDate: '',
       preferredTime: '',
       numberOfPeople: 1,
-      specialRequests: '',
-      contactMethod: 'email'
+      noteOrQuestion: '',
+      preferredContactMode: 'email'
     };
   }
 
@@ -149,14 +149,21 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Here you would typically send the data to your backend API
-    console.log('Tour request submitted:', this.tourForm);
-    
-    // Show success message
-    alert('Thank you! Your tour request has been submitted. We will contact you within 24 hours to confirm your appointment.');
-    
-    // Close modal and reset form
-    this.closeScheduleTourModal();
+    // Call the scheduleTour method from ContactUsService
+    this.contactUsService.scheduleTour(this.tourForm).subscribe({
+      next: (response) => {
+        console.log('Tour request submitted successfully:', response);
+        // Show success message
+        alert('Thank you! Your tour request has been submitted. We will contact you within 24 hours to confirm your appointment.');
+        // Close modal and reset form
+        this.closeScheduleTourModal();
+      },
+      error: (error) => {
+        console.error('Error submitting tour request:', error);
+        // Show error message
+        alert('Sorry, there was an error submitting your tour request. Please try again later.');
+      }
+    });
   }
 
   isFormValid(): boolean {
@@ -164,7 +171,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.tourForm.firstName &&
       this.tourForm.lastName &&
       this.tourForm.email &&
-      this.tourForm.phone &&
+      this.tourForm.phoneNumber &&
       this.tourForm.preferredDate &&
       this.tourForm.preferredTime
     );

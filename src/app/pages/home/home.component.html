@@ -681,7 +681,7 @@
               <input 
                 type="tel" 
                 id="tourPhone" 
-                [(ngModel)]="tourForm.phone" 
+                [(ngModel)]="tourForm.phoneNumber" 
                 name="phone"
                 class="form-input" 
                 required>
@@ -697,7 +697,7 @@
               <label for="tourServiceInterest" class="form-label">Service of Interest</label>
               <select 
                 id="tourServiceInterest" 
-                [(ngModel)]="tourForm.serviceInterest" 
+                [(ngModel)]="tourForm.serviceName" 
                 name="serviceInterest"
                 class="form-select">
                 <option value="">Select a service</option>
@@ -751,33 +751,31 @@
         <!-- Additional Information -->
         <div class="form-section">
           <h3 class="section-title">Additional Information</h3>
-          <div class="form-group">
-            <label for="tourContactMethod" class="form-label">Preferred Contact Method</label>
-            <div class="radio-group">
-              <label class="radio-option">
-                <input 
-                  type="radio" 
-                  [(ngModel)]="tourForm.contactMethod" 
-                  name="contactMethod"
-                  value="email">
-                <span class="radio-label">📧 Email</span>
-              </label>
-              <label class="radio-option">
-                <input 
-                  type="radio" 
-                  [(ngModel)]="tourForm.contactMethod" 
-                  name="contactMethod"
-                  value="phone">
-                <span class="radio-label">📞 Phone</span>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-group">
+            <div class="form-group">
+              <label for="tourContactMethod" class="form-label">Preferred Contact Method</label>
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    [(ngModel)]="tourForm.preferredContactMode" 
+                    name="contactMethod"
+                    value="email">
+                  <span class="radio-label">📧 Email</span>
+                </label>
+                <label class="radio-option">
+                  <input 
+                    type="radio" 
+                    [(ngModel)]="tourForm.preferredContactMode" 
+                    name="contactMethod"
+                    value="phone">
+                  <span class="radio-label">📞 Phone</span>
+                </label>
+              </div>
+            </div>          <div class="form-group">
             <label for="tourSpecialRequests" class="form-label">Special Requests or Questions</label>
             <textarea 
               id="tourSpecialRequests" 
-              [(ngModel)]="tourForm.specialRequests" 
+              [(ngModel)]="tourForm.noteOrQuestion" 
               name="specialRequests"
               rows="3" 
               class="form-textarea" 
