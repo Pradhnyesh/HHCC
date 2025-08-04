@@ -63,7 +63,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     lastName: '',
     email: '',
     phone: '',
-    service: '',
+    servicename: '',
     message: ''
   };
 
@@ -215,7 +215,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.contactForm.lastName.trim() &&
       this.contactForm.email.trim() &&
       this.contactForm.phone.trim() &&
-      this.contactForm.service.trim() &&
+      this.contactForm.servicename.trim() &&
       this.contactForm.message.trim()
     );
   }
@@ -255,7 +255,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       lastName: '',
       email: '',
       phone: '',
-      service: '',
+      servicename: '',
       message: ''
     };
   }
