@@ -21,19 +21,28 @@ export class SignupComponent {
            this.signupForm.email.trim() !== '' &&
            this.signupForm.phone.trim() !== '' &&
            this.signupForm.password.trim() !== '' &&
-           this.signupForm.confirmPassword.trim() !== '';
+           this.signupForm.confirmPassword.trim() !== '' &&
+           this.signupForm.password === this.signupForm.confirmPassword;
+  }
+
+  passwordsMatch(): boolean {
+    return this.signupForm.password === this.signupForm.confirmPassword;
   }
 
   onCreateAccount() {
-    console.log('Create Account button clicked!'); // Debug log
-    console.log('Form values:', this.signupForm); // Debug log
-    console.log('Is form valid?', this.isFormValid()); // Debug log
-    
-    if (this.isFormValid()) {
-      console.log('Signup Form Data:', this.signupForm);
+    if (!this.isFormValid()) {
+      if (this.signupForm.firstName.trim() === '' ||
+          this.signupForm.lastName.trim() === '' ||
+          this.signupForm.email.trim() === '' ||
+          this.signupForm.phone.trim() === '' ||
+          this.signupForm.password.trim() === '' ||
+          this.signupForm.confirmPassword.trim() === '') {
+        alert('Please fill in all fields');
+      } else if (!this.passwordsMatch()) {
+        alert('Passwords do not match. Please make sure both password fields are identical.');
+      }
     } else {
-      console.log('Form is invalid - all fields are required');
-      alert('Please fill in all fields');
+      console.log('Signup Form Data:', this.signupForm);
     }
   }
 }
