@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { UserService } from '../../../services/user.service';
 
 @Component({
@@ -16,7 +17,7 @@ export class SignupComponent {
     confirmPassword: ''
   };
 
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService, private router: Router) { }
 
   isFormValid(): boolean {
     return this.signupForm.firstName.trim() !== '' &&
@@ -30,6 +31,17 @@ export class SignupComponent {
 
   passwordsMatch(): boolean {
     return this.signupForm.password === this.signupForm.confirmPassword;
+  }
+
+  clearForm() {
+    this.signupForm = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: ''
+    };
   }
 
   onCreateAccount() {
@@ -52,6 +64,8 @@ export class SignupComponent {
         next: (response) => {
           console.log('User created successfully:', response);
           alert('Account created successfully!');
+          this.clearForm(); // Clear the form
+          this.router.navigate(['/login']); // Navigate to login page
         },
         error: (error) => {
           console.error('Error creating user:', error);
