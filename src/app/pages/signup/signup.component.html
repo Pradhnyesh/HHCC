@@ -11,7 +11,7 @@
     </div>
 
     <!-- Signup Form -->
-    <form class="signup-form">
+    <div class="signup-form">
       <div class="form-row">
         <div class="form-group">
           <label for="firstName" class="form-label">First Name</label>
@@ -21,7 +21,7 @@
             name="firstName" 
             class="form-input"
             placeholder="Enter first name"
-            required
+            [(ngModel)]="signupForm.firstName"
           >
           <span class="input-icon">👤</span>
         </div>
@@ -34,7 +34,7 @@
             name="lastName" 
             class="form-input"
             placeholder="Enter last name"
-            required
+            [(ngModel)]="signupForm.lastName"
           >
           <span class="input-icon">👤</span>
         </div>
@@ -48,7 +48,7 @@
           name="email" 
           class="form-input"
           placeholder="Enter your email"
-          required
+          [(ngModel)]="signupForm.email"
         >
         <span class="input-icon">📧</span>
       </div>
@@ -61,7 +61,7 @@
           name="phone" 
           class="form-input"
           placeholder="Enter phone number"
-          required
+          [(ngModel)]="signupForm.phone"
         >
         <span class="input-icon">📱</span>
       </div>
@@ -74,7 +74,7 @@
           name="password" 
           class="form-input"
           placeholder="Create password"
-          required
+          [(ngModel)]="signupForm.password"
         >
         <span class="input-icon">🔒</span>
       </div>
@@ -87,26 +87,18 @@
           name="confirmPassword" 
           class="form-input"
           placeholder="Confirm password"
-          required
+          [(ngModel)]="signupForm.confirmPassword"
         >
         <span class="input-icon">🔐</span>
       </div>
 
-      <div class="form-options">
-        <div class="terms-agreement">
-          <input type="checkbox" id="terms" name="terms" class="checkbox" required>
-          <label for="terms" class="checkbox-label">
-            I agree to the <a href="#terms" class="terms-link">Terms & Conditions</a>
-          </label>
-        </div>
-        <div class="newsletter-signup">
-          <input type="checkbox" id="newsletter" name="newsletter" class="checkbox">
-          <label for="newsletter" class="checkbox-label">Subscribe to newsletter</label>
-        </div>
-      </div>
-
-      <button type="submit" class="signup-btn">Create Account</button>
-    </form>
+      <button 
+        type="button" 
+        class="signup-btn" 
+        (click)="onCreateAccount()">
+        Create Account
+      </button>
+    </div>
 
     <!-- Divider -->
     <div class="divider">
