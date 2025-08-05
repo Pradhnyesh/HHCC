@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-signup',
@@ -14,6 +15,8 @@ export class SignupComponent {
     password: '',
     confirmPassword: ''
   };
+
+  constructor(private userService: UserService) { }
 
   isFormValid(): boolean {
     return this.signupForm.firstName.trim() !== '' &&
@@ -43,6 +46,18 @@ export class SignupComponent {
       }
     } else {
       console.log('Signup Form Data:', this.signupForm);
+      
+      // Call createUser method from UserService
+      this.userService.createUser(this.signupForm).subscribe({
+        next: (response) => {
+          console.log('User created successfully:', response);
+          alert('Account created successfully!');
+        },
+        error: (error) => {
+          console.error('Error creating user:', error);
+          alert('Error creating account. Please try again.');
+        }
+      });
     }
   }
 }
