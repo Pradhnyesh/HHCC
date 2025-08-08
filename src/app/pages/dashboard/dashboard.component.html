@@ -245,14 +245,15 @@
         </div>
 
         <div class="form-group" *ngIf="appointmentForm.pickupDrop">
-          <label for="address">Pickup Address</label>
+          <label for="address">Pickup Address <span style="color: red;">*</span></label>
           <textarea 
             id="address" 
             name="address" 
             [(ngModel)]="appointmentForm.address" 
             rows="3" 
             class="form-control"
-            placeholder="Enter your full address for pickup..."></textarea>
+            placeholder="Enter your full address for pickup..."
+            required></textarea>
         </div>
 
         <div class="form-group">
