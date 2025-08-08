@@ -100,15 +100,23 @@ export class DashboardComponent {
     'Elder Day Care',
     'Pet Day Care',
     'Special Needs Care',
-    'After School Care',
-    'Respite Care',
-    'Medical Consultation',
-    'Health Checkup',
-    'Emergency Care',
-    'Mental Health Support',
-    'Nutrition Counseling',
-    'Physiotherapy'
+    'After School Program',
+    'Respite Care'
   ];
+
+  // Get filtered services based on appointment type
+  getFilteredServices(): string[] {
+    if (this.appointmentForm.type === 'pet') {
+      return this.services.filter(service => 
+        service === 'Pet Day Care' || 
+        service === 'Special Needs Care' || 
+        service === 'Respite Care'
+      );
+    } else {
+      // For family appointments, show all services except Pet Day Care
+      return this.services.filter(service => service !== 'Pet Day Care');
+    }
+  }
 
   constructor() {
     // Add some sample data for demonstration
