@@ -6,12 +6,13 @@ import { SignupComponent } from './pages/signup/signup.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AdminComponent } from './pages/admin/admin.component';
 import { ManageAppointmentComponent } from './pages/manage-appointment/manage-appointment.component';
+import { authGuard } from './auth.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: 'signup', component: SignupComponent},
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard]  },
   { path: 'admin', component: AdminComponent },
   { path: 'manage-appointments', component: ManageAppointmentComponent },
   { path: '**', redirectTo: '' }
