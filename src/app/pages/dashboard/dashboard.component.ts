@@ -6,7 +6,7 @@ interface FamilyMember {
   name: string;
   relation: string;
   age: number;
-  medicalConditions?: string;
+  medicalCondition?: string;
 }
 
 interface Pet {
@@ -160,18 +160,36 @@ export class DashboardComponent implements OnInit {
       if (index !== -1) {
         this.familyMembers[index] = { ...this.familyMemberForm } as FamilyMember;
       }
+      this.closeFamilyModal();
     } else {
-      // Add new member
-      const newMember: FamilyMember = {
-        id: this.nextFamilyId++,
+      // Add new member - call backend API
+      const memberData = {
         name: this.familyMemberForm.name || '',
         relation: this.familyMemberForm.relation || '',
         age: this.familyMemberForm.age || 0,
-        medicalConditions: this.familyMemberForm.medicalConditions
+        medicalCondition: this.familyMemberForm.medicalCondition || ''
       };
-      this.familyMembers.push(newMember);
+
+      this.userService.addFamilyMember(memberData).subscribe({
+        next: (response) => {
+          console.log('Family member added successfully:', response);
+          
+          // Add to local array after successful API call
+          const newMember: FamilyMember = {
+            id: this.nextFamilyId++,
+            ...memberData
+          };
+          this.familyMembers.push(newMember);
+          
+          this.closeFamilyModal();
+          alert('Family member added successfully!');
+        },
+        error: (error) => {
+          console.error('Error adding family member:', error);
+          alert('Failed to add family member. Please try again.');
+        }
+      });
     }
-    this.closeFamilyModal();
   }
 
   deleteFamilyMember(id: number) {
@@ -440,14 +458,14 @@ export class DashboardComponent implements OnInit {
         name: 'Sarah Doe',
         relation: 'Spouse',
         age: 35,
-        medicalConditions: 'None'
+        medicalCondition: 'None'
       },
       {
         id: this.nextFamilyId++,
         name: 'Emma Doe',
         relation: 'Child',
         age: 8,
-        medicalConditions: 'Allergic to peanuts'
+        medicalCondition: 'Allergic to peanuts'
       }
     ];
 

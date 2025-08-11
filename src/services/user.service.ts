@@ -21,4 +21,8 @@ export class UserService {
     return this.http.post('http://localhost:8080/user/contactus', contactData, {responseType: 'text'});
   }
 
+  addFamilyMember(memberData: any) {
+    return this.http.post('http://localhost:8080/user/addfamilymember', memberData, {responseType: 'text'});
+  }
+
 }
