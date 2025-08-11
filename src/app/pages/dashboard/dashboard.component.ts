@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { UserService } from '../../../services/user.service';
 
 interface FamilyMember {
   id: number;
@@ -86,7 +87,7 @@ export class DashboardComponent {
     phone: '',
     subject: '',
     message: '',
-    urgency: 'normal'
+    priority: 'normal'
   };
   
   // ID counters
@@ -118,7 +119,7 @@ export class DashboardComponent {
     }
   }
 
-  constructor() {
+  constructor(private userService: UserService) {
     // Add some sample data for demonstration
     this.addSampleData();
   }
@@ -352,7 +353,7 @@ export class DashboardComponent {
       phone: '',
       subject: '',
       message: '',
-      urgency: 'normal'
+      priority: 'normal'
     };
     this.showContactModal = true;
   }
@@ -365,16 +366,24 @@ export class DashboardComponent {
       phone: '',
       subject: '',
       message: '',
-      urgency: 'normal'
+      priority: 'normal'
     };
   }
 
   submitContactForm() {
     if (this.contactForm.name && this.contactForm.email && this.contactForm.subject && this.contactForm.message) {
-      // In a real application, this would send the message to the admin
-      console.log('Contact form submitted:', this.contactForm);
-      this.closeContactModal();
-      alert('Your message has been sent successfully! Our admin team will contact you within 24 hours.');
+      // Send the message to the server using user service
+      this.userService.contactUs(this.contactForm).subscribe({
+        next: (response) => {
+          console.log('Contact form submitted successfully:', response);
+          this.closeContactModal();
+          alert('Your message has been sent successfully! Our admin team will contact you within 24 hours.');
+        },
+        error: (error) => {
+          console.error('Error submitting contact form:', error);
+          alert('There was an error sending your message. Please try again later.');
+        }
+      });
     } else {
       alert('Please fill in all required fields');
     }

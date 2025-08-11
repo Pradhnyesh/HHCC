@@ -15,4 +15,9 @@ export class UserService {
   loginUser(loginData: any) {
     return this.http.post('http://localhost:8080/user/login', loginData, {responseType: 'text'});
   }
+
+  contactUs(contactData: any) {
+    return this.http.post('http://localhost:8080/user/contactus', contactData, {responseType: 'text'});
+  }
+
 }
