@@ -24,7 +24,9 @@ export class LoginComponent {
         const userData = response; // Assuming response contains user data
         console.log('Login successful:', response);
         //@ts-ignore
-        sessionStorage.setItem('user', JSON.stringify(userData.email)); // Store user data in sessionStorage
+        sessionStorage.setItem('user', userData.email);
+        //@ts-ignore
+        sessionStorage.setItem('user_Name',  userData.firstName + ' ' + userData.lastName);
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {

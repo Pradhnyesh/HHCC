@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 
 interface FamilyMember {
@@ -52,7 +52,7 @@ interface Appointment {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   // Data arrays
   familyMembers: FamilyMember[] = [];
   pets: Pet[] = [];
@@ -95,6 +95,10 @@ export class DashboardComponent {
   private nextPetId = 1;
   private nextAppointmentId = 1;
 
+  // User data
+  public userName: string = '';
+  public userEmail: string = '';
+
   // Available services
   services = [
     'Child Day Care',
@@ -122,6 +126,12 @@ export class DashboardComponent {
   constructor(private userService: UserService) {
     // Add some sample data for demonstration
     this.addSampleData();
+  }
+  ngOnInit(): void {
+    //@ts-ignore
+    this.userName = sessionStorage.getItem('user_Name');
+    //@ts-ignore
+    this.userEmail = sessionStorage.getItem('user');
   }
 
   // Family Member Methods
