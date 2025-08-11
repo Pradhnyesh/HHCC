@@ -25,4 +25,8 @@ export class UserService {
     return this.http.post('http://localhost:8080/user/addfamilymember', memberData, {responseType: 'text'});
   }
 
+  addPet(petData: any) {
+    return this.http.post('http://localhost:8080/user/addpet', petData, {responseType: 'text'});
+  }
+
 }

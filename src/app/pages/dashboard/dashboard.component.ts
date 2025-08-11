@@ -15,7 +15,7 @@ interface Pet {
   type: string;
   breed: string;
   age: number;
-  specialCare?: string;
+  specialCareNote?: string;
 }
 
 interface Appointment {
@@ -224,19 +224,37 @@ export class DashboardComponent implements OnInit {
       if (index !== -1) {
         this.pets[index] = { ...this.petForm } as Pet;
       }
+      this.closePetModal();
     } else {
-      // Add new pet
-      const newPet: Pet = {
-        id: this.nextPetId++,
+      // Add new pet - call backend API
+      const petData = {
         name: this.petForm.name || '',
         type: this.petForm.type || '',
         breed: this.petForm.breed || '',
         age: this.petForm.age || 0,
-        specialCare: this.petForm.specialCare
+        specialCareNote: this.petForm.specialCareNote || ''
       };
-      this.pets.push(newPet);
+
+      this.userService.addPet(petData).subscribe({
+        next: (response) => {
+          console.log('Pet added successfully:', response);
+          
+          // Add to local array after successful API call
+          const newPet: Pet = {
+            id: this.nextPetId++,
+            ...petData
+          };
+          this.pets.push(newPet);
+          
+          this.closePetModal();
+          alert('Pet added successfully!');
+        },
+        error: (error) => {
+          console.error('Error adding pet:', error);
+          alert('Failed to add pet. Please try again.');
+        }
+      });
     }
-    this.closePetModal();
   }
 
   deletePet(id: number) {
@@ -476,7 +494,7 @@ export class DashboardComponent implements OnInit {
         type: 'Dog',
         breed: 'Golden Retriever',
         age: 3,
-        specialCare: 'Needs daily exercise'
+        specialCareNote: 'Needs daily exercise'
       }
     ];
 
