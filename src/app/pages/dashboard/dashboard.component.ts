@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../../services/user.service';
 
 interface FamilyMember {
-  id: number;
+  memberId: number;
   name: string;
   relation: string;
   age: number;
@@ -149,7 +149,7 @@ export class DashboardComponent implements OnInit {
         
         // Update the next ID counter based on existing members
         if (this.familyMembers.length > 0) {
-          const maxId = Math.max(...this.familyMembers.map(m => m.id || 0));
+          const maxId = Math.max(...this.familyMembers.map(m => m.memberId || 0));
           this.nextFamilyId = maxId + 1;
         }
       },
@@ -204,7 +204,7 @@ export class DashboardComponent implements OnInit {
   saveFamilyMember() {
     if (this.editingFamilyMember) {
       // Update existing member
-      const index = this.familyMembers.findIndex(m => m.id === this.editingFamilyMember!.id);
+      const index = this.familyMembers.findIndex(m => m.memberId === this.editingFamilyMember!.memberId);
       if (index !== -1) {
         this.familyMembers[index] = { ...this.familyMemberForm } as FamilyMember;
       }
@@ -237,8 +237,23 @@ export class DashboardComponent implements OnInit {
   }
 
   deleteFamilyMember(id: number) {
+    console.log('Deleting family member with ID:', id);
     if (confirm('Are you sure you want to delete this family member?')) {
-      this.familyMembers = this.familyMembers.filter(m => m.id !== id);
+      // Call backend API to delete the family member
+      this.userService.removeMember(id).subscribe({
+        next: (response) => {
+          console.log('Family member deleted successfully:', response);
+          
+          // Reload family members from API to get updated list
+          this.loadFamilyMembers();
+          
+          alert('Family member deleted successfully!');
+        },
+        error: (error) => {
+          console.error('Error deleting family member:', error);
+          alert('Failed to delete family member. Please try again.');
+        }
+      });
     }
   }
 

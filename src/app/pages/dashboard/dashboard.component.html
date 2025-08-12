@@ -75,9 +75,9 @@
             </div>
           </div>
           <div class="member-actions">
-            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('family', member.id, member.name)" title="Schedule Appointment">📅</button>
+            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('family', member.memberId, member.name)" title="Schedule Appointment">📅</button>
             <button class="btn-icon edit-btn" (click)="editFamilyMember(member)" title="Edit">✏️</button>
-            <button class="btn-icon delete-btn" (click)="deleteFamilyMember(member.id)" title="Delete">🗑️</button>
+            <button class="btn-icon delete-btn" (click)="deleteFamilyMember(member.memberId)" title="Delete">🗑️</button>
           </div>
         </div>
       </div>

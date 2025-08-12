@@ -37,4 +37,8 @@ export class UserService {
     return this.http.get(`http://localhost:8080/user/getpetmembers?userEmail=${sessionStorage.getItem('user')}`, {responseType: 'json'});
   }
 
+  removeMember(memberId: number): Observable<any> {
+    console.log("Removing member with ID from service:", memberId);
+    return this.http.delete(`http://localhost:8080/user/removemember/${memberId}`, {responseType: 'text'});
+  }
 }
