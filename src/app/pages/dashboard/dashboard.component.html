@@ -115,9 +115,9 @@
             </div>
           </div>
           <div class="pet-actions">
-            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('pet', pet.id, pet.name)" title="Schedule Appointment">📅</button>
+            <button class="btn-icon schedule-btn" (click)="scheduleAppointment('pet', pet.memberId, pet.name)" title="Schedule Appointment">📅</button>
             <button class="btn-icon edit-btn" (click)="editPet(pet)" title="Edit">✏️</button>
-            <button class="btn-icon delete-btn" (click)="deletePet(pet.id)" title="Delete">🗑️</button>
+            <button class="btn-icon delete-btn" (click)="deletePet(pet.memberId)" title="Delete">🗑️</button>
           </div>
         </div>
       </div>

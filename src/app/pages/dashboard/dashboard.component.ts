@@ -10,7 +10,7 @@ interface FamilyMember {
 }
 
 interface Pet {
-  id: number;
+  memberId: number;
   name: string;
   type: string;
   breed: string;
@@ -170,7 +170,7 @@ export class DashboardComponent implements OnInit {
         
         // Update the next ID counter based on existing pets
         if (this.pets.length > 0) {
-          const maxId = Math.max(...this.pets.map(p => p.id || 0));
+          const maxId = Math.max(...this.pets.map(p => p.memberId || 0));
           this.nextPetId = maxId + 1;
         }
       },
@@ -298,7 +298,7 @@ export class DashboardComponent implements OnInit {
   savePet() {
     if (this.editingPet) {
       // Update existing pet
-      const index = this.pets.findIndex(p => p.id === this.editingPet!.id);
+      const index = this.pets.findIndex(p => p.memberId === this.editingPet!.memberId);
       if (index !== -1) {
         this.pets[index] = { ...this.petForm } as Pet;
       }
@@ -333,8 +333,23 @@ export class DashboardComponent implements OnInit {
   }
 
   deletePet(id: number) {
+    console.log('Deleting pet with ID:', id);
     if (confirm('Are you sure you want to delete this pet?')) {
-      this.pets = this.pets.filter(p => p.id !== id);
+      // Call backend API to delete the pet
+      this.userService.removePet(id).subscribe({
+        next: (response) => {
+          console.log('Pet deleted successfully:', response);
+          
+          // Reload pet members from API to get updated list
+          this.loadPetMembers();
+          
+          alert('Pet deleted successfully!');
+        },
+        error: (error) => {
+          console.error('Error deleting pet:', error);
+          alert('Failed to delete pet. Please try again.');
+        }
+      });
     }
   }
 

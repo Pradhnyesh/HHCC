@@ -44,4 +44,8 @@ export class UserService {
   updateFamilyMember(memberData: any): Observable<any> {
     return this.http.put(`http://localhost:8080/user/updatefamilymember`, memberData, {responseType: 'text'});
   }
+
+  removePet(petId: number): Observable<any> {
+    return this.http.delete(`http://localhost:8080/user/removepet/${petId}`, {responseType: 'text'});
+  }
 }
