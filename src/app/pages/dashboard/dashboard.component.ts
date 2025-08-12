@@ -233,7 +233,8 @@ export class DashboardComponent implements OnInit {
         name: this.familyMemberForm.name || '',
         relation: this.familyMemberForm.relation || '',
         age: this.familyMemberForm.age || 0,
-        medicalCondition: this.familyMemberForm.medicalCondition || ''
+        medicalCondition: this.familyMemberForm.medicalCondition || '',
+        userEmail: sessionStorage.getItem('user') || ''
       };
 
       this.userService.addFamilyMember(memberData).subscribe({
@@ -309,7 +310,8 @@ export class DashboardComponent implements OnInit {
         type: this.petForm.type || '',
         breed: this.petForm.breed || '',
         age: this.petForm.age || 0,
-        specialCareNote: this.petForm.specialCareNote || ''
+        specialCareNote: this.petForm.specialCareNote || '',
+        userEmail: sessionStorage.getItem('user') || ''
       };
 
       this.userService.addPet(petData).subscribe({
