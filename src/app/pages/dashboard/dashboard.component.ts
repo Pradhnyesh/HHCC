@@ -135,6 +135,9 @@ export class DashboardComponent implements OnInit {
     
     // Load family members from API
     this.loadFamilyMembers();
+    
+    // Load pet members from API
+    this.loadPetMembers();
   }
 
   // Load family members from backend API
@@ -154,6 +157,27 @@ export class DashboardComponent implements OnInit {
         console.error('Error loading family members:', error);
         // Keep empty array on error
         this.familyMembers = [];
+      }
+    });
+  }
+
+  // Load pet members from backend API
+  loadPetMembers() {
+    this.userService.getPetMembers().subscribe({
+      next: (response) => {
+        console.log('Pet members loaded:', response);
+        this.pets = response || [];
+        
+        // Update the next ID counter based on existing pets
+        if (this.pets.length > 0) {
+          const maxId = Math.max(...this.pets.map(p => p.id || 0));
+          this.nextPetId = maxId + 1;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading pet members:', error);
+        // Keep empty array on error
+        this.pets = [];
       }
     });
   }
@@ -259,12 +283,8 @@ export class DashboardComponent implements OnInit {
         next: (response) => {
           console.log('Pet added successfully:', response);
           
-          // Add to local array after successful API call
-          const newPet: Pet = {
-            id: this.nextPetId++,
-            ...petData
-          };
-          this.pets.push(newPet);
+          // Reload pet members from API to get updated list
+          this.loadPetMembers();
           
           this.closePetModal();
           alert('Pet added successfully!');
@@ -493,16 +513,8 @@ export class DashboardComponent implements OnInit {
     // Remove sample family members - will be loaded from API
     this.familyMembers = [];
 
-    this.pets = [
-      {
-        id: this.nextPetId++,
-        name: 'Buddy',
-        type: 'Dog',
-        breed: 'Golden Retriever',
-        age: 3,
-        specialCareNote: 'Needs daily exercise'
-      }
-    ];
+    // Remove sample pets - will be loaded from API
+    this.pets = [];
 
     // Add some sample appointments for demonstration
     this.appointments = [
