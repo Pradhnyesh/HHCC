@@ -203,12 +203,30 @@ export class DashboardComponent implements OnInit {
 
   saveFamilyMember() {
     if (this.editingFamilyMember) {
-      // Update existing member
-      const index = this.familyMembers.findIndex(m => m.memberId === this.editingFamilyMember!.memberId);
-      if (index !== -1) {
-        this.familyMembers[index] = { ...this.familyMemberForm } as FamilyMember;
-      }
-      this.closeFamilyModal();
+      // Update existing member - call backend API
+      const memberData = {
+        memberId: this.editingFamilyMember.memberId,
+        name: this.familyMemberForm.name || '',
+        relation: this.familyMemberForm.relation || '',
+        age: this.familyMemberForm.age || 0,
+        medicalCondition: this.familyMemberForm.medicalCondition || ''
+      };
+
+      this.userService.updateFamilyMember(memberData).subscribe({
+        next: (response) => {
+          console.log('Family member updated successfully:', response);
+          
+          // Reload family members from API to get updated list
+          this.loadFamilyMembers();
+          
+          this.closeFamilyModal();
+          alert('Family member updated successfully!');
+        },
+        error: (error) => {
+          console.error('Error updating family member:', error);
+          alert('Failed to update family member. Please try again.');
+        }
+      });
     } else {
       // Add new member - call backend API
       const memberData = {

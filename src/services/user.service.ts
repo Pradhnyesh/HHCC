@@ -38,7 +38,10 @@ export class UserService {
   }
 
   removeMember(memberId: number): Observable<any> {
-    console.log("Removing member with ID from service:", memberId);
     return this.http.delete(`http://localhost:8080/user/removemember/${memberId}`, {responseType: 'text'});
+  }
+
+  updateFamilyMember(memberData: any): Observable<any> {
+    return this.http.put(`http://localhost:8080/user/updatefamilymember`, memberData, {responseType: 'text'});
   }
 }
