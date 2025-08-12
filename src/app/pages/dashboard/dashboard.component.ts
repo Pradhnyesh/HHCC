@@ -132,6 +132,30 @@ export class DashboardComponent implements OnInit {
     this.userName = sessionStorage.getItem('user_Name');
     //@ts-ignore
     this.userEmail = sessionStorage.getItem('user');
+    
+    // Load family members from API
+    this.loadFamilyMembers();
+  }
+
+  // Load family members from backend API
+  loadFamilyMembers() {
+    this.userService.getFamilyMembers().subscribe({
+      next: (response) => {
+        console.log('Family members loaded:', response);
+        this.familyMembers = response || [];
+        
+        // Update the next ID counter based on existing members
+        if (this.familyMembers.length > 0) {
+          const maxId = Math.max(...this.familyMembers.map(m => m.id || 0));
+          this.nextFamilyId = maxId + 1;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading family members:', error);
+        // Keep empty array on error
+        this.familyMembers = [];
+      }
+    });
   }
 
   // Family Member Methods
@@ -174,12 +198,8 @@ export class DashboardComponent implements OnInit {
         next: (response) => {
           console.log('Family member added successfully:', response);
           
-          // Add to local array after successful API call
-          const newMember: FamilyMember = {
-            id: this.nextFamilyId++,
-            ...memberData
-          };
-          this.familyMembers.push(newMember);
+          // Reload family members from API to get updated list
+          this.loadFamilyMembers();
           
           this.closeFamilyModal();
           alert('Family member added successfully!');
@@ -470,22 +490,8 @@ export class DashboardComponent implements OnInit {
 
   // Helper method to add sample data
   private addSampleData() {
-    this.familyMembers = [
-      {
-        id: this.nextFamilyId++,
-        name: 'Sarah Doe',
-        relation: 'Spouse',
-        age: 35,
-        medicalCondition: 'None'
-      },
-      {
-        id: this.nextFamilyId++,
-        name: 'Emma Doe',
-        relation: 'Child',
-        age: 8,
-        medicalCondition: 'Allergic to peanuts'
-      }
-    ];
+    // Remove sample family members - will be loaded from API
+    this.familyMembers = [];
 
     this.pets = [
       {

@@ -29,4 +29,8 @@ export class UserService {
     return this.http.post('http://localhost:8080/user/addpet', petData, {responseType: 'text'});
   }
 
+  getFamilyMembers(): Observable<any> {
+    return this.http.get(`http://localhost:8080/user/getfamilymembers?userEmail=${sessionStorage.getItem('user')}`, {responseType: 'json'});
+  }
+
 }
