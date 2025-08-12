@@ -48,4 +48,8 @@ export class UserService {
   removePet(petId: number): Observable<any> {
     return this.http.delete(`http://localhost:8080/user/removepet/${petId}`, {responseType: 'text'});
   }
+
+  updatePet(petData: any): Observable<any> {
+    return this.http.put(`http://localhost:8080/user/updatepet`, petData, {responseType: 'text'});
+  }
 }

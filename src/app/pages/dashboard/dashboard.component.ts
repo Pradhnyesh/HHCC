@@ -297,12 +297,31 @@ export class DashboardComponent implements OnInit {
 
   savePet() {
     if (this.editingPet) {
-      // Update existing pet
-      const index = this.pets.findIndex(p => p.memberId === this.editingPet!.memberId);
-      if (index !== -1) {
-        this.pets[index] = { ...this.petForm } as Pet;
-      }
-      this.closePetModal();
+      // Update existing pet - call backend API
+      const petData = {
+        memberId: this.editingPet.memberId,
+        name: this.petForm.name || '',
+        type: this.petForm.type || '',
+        breed: this.petForm.breed || '',
+        age: this.petForm.age || 0,
+        specialCareNote: this.petForm.specialCareNote || ''
+      };
+
+      this.userService.updatePet(petData).subscribe({
+        next: (response) => {
+          console.log('Pet updated successfully:', response);
+          
+          // Reload pet members from API to get updated list
+          this.loadPetMembers();
+          
+          this.closePetModal();
+          alert('Pet updated successfully!');
+        },
+        error: (error) => {
+          console.error('Error updating pet:', error);
+          alert('Failed to update pet. Please try again.');
+        }
+      });
     } else {
       // Add new pet - call backend API
       const petData = {
