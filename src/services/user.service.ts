@@ -52,4 +52,8 @@ export class UserService {
   updatePet(petData: any): Observable<any> {
     return this.http.put(`http://localhost:8080/user/updatepet`, petData, {responseType: 'text'});
   }
+
+  bookAppointment(appointmentData: any): Observable<any> {
+    return this.http.post('http://localhost:8080/user/fixappointment', appointmentData, {responseType: 'text'});
+  }
 }

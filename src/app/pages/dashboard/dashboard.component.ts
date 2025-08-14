@@ -396,22 +396,50 @@ export class DashboardComponent implements OnInit {
 
   saveAppointment() {
     if (this.appointmentForm.service && this.appointmentForm.date && this.appointmentForm.time) {
-      const newAppointment: Appointment = {
-        id: this.nextAppointmentId++,
-        type: this.appointmentForm.type!,
-        memberId: this.appointmentForm.memberId!,
+      // Prepare appointment data for backend API
+      const appointmentData = {
+        appointmentType: this.appointmentForm.type!,
+        memberId: this.appointmentForm.type === 'family' ? this.appointmentForm.memberId! : null,
+        petId: this.appointmentForm.type === 'pet' ? this.appointmentForm.memberId! : null,
         memberName: this.appointmentForm.memberName!,
-        service: this.appointmentForm.service!,
-        date: this.appointmentForm.date!,
-        time: this.appointmentForm.time!,
-        pickupDrop: this.appointmentForm.pickupDrop || false,
-        address: this.appointmentForm.address || '',
-        notes: this.appointmentForm.notes || '',
+        appointmentService: this.appointmentForm.service!,
+        appointmentDate: this.appointmentForm.date!,
+        appointmentTime: this.appointmentForm.time!,
+        pickupDrop: this.appointmentForm.pickupDrop ? 'Y' : 'N',
+        pickupDropAddress: this.appointmentForm.address || '',
+        userNote: this.appointmentForm.notes || '',
         status: 'scheduled'
       };
-      this.appointments.push(newAppointment);
-      this.closeAppointmentModal();
-      alert('Appointment scheduled successfully!');
+
+      // Call backend API to book appointment
+      this.userService.bookAppointment(appointmentData).subscribe({
+        next: (response) => {
+          console.log('Appointment booked successfully:', response);
+          
+          // Add to local appointments array for immediate UI update
+          const newAppointment: Appointment = {
+            id: this.nextAppointmentId++,
+            type: this.appointmentForm.type!,
+            memberId: this.appointmentForm.memberId!,
+            memberName: this.appointmentForm.memberName!,
+            service: this.appointmentForm.service!,
+            date: this.appointmentForm.date!,
+            time: this.appointmentForm.time!,
+            pickupDrop: this.appointmentForm.pickupDrop || false,
+            address: this.appointmentForm.address || '',
+            notes: this.appointmentForm.notes || '',
+            status: 'scheduled'
+          };
+          this.appointments.push(newAppointment);
+          
+          this.closeAppointmentModal();
+          alert('Appointment scheduled successfully!');
+        },
+        error: (error) => {
+          console.error('Error booking appointment:', error);
+          alert('Failed to schedule appointment. Please try again.');
+        }
+      });
     } else {
       alert('Please fill in all required fields');
     }
