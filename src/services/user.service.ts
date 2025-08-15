@@ -56,4 +56,8 @@ export class UserService {
   bookAppointment(appointmentData: any): Observable<any> {
     return this.http.post('http://localhost:8080/user/fixappointment', appointmentData, {responseType: 'text'});
   }
+
+  getBookedAppointments(): Observable<any> {
+    return this.http.get(`http://localhost:8080/user/getappointment/${sessionStorage.getItem('user')}`, {responseType: 'json'});
+  }
 }

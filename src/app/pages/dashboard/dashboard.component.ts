@@ -23,7 +23,7 @@ interface Appointment {
   type: 'family' | 'pet';
   memberId: number;
   memberName: string;
-  service: string;
+  serviceName: string;
   date: string;
   time: string;
   pickupDrop: boolean;
@@ -138,6 +138,9 @@ export class DashboardComponent implements OnInit {
     
     // Load pet members from API
     this.loadPetMembers();
+    
+    // Load appointments from API
+    this.loadAppointments();
   }
 
   // Load family members from backend API
@@ -178,6 +181,34 @@ export class DashboardComponent implements OnInit {
         console.error('Error loading pet members:', error);
         // Keep empty array on error
         this.pets = [];
+      }
+    });
+  }
+
+  // Load appointments from backend API
+  loadAppointments() {
+    this.userService.getBookedAppointments().subscribe({
+      next: (response) => {
+        console.log('Appointments loaded:', response);
+        console.log('Number of appointments received:', response ? response.length : 0);
+        this.appointments = response || [];
+        
+        // Log appointment details for debugging
+        if (this.appointments.length > 0) {
+          console.log('Appointment statuses:', this.appointments.map(a => a.status));
+          console.log('First appointment:', this.appointments[0]);
+        }
+        
+        // Update the next ID counter based on existing appointments
+        if (this.appointments.length > 0) {
+          const maxId = Math.max(...this.appointments.map(a => a.id || 0));
+          this.nextAppointmentId = maxId + 1;
+        }
+      },
+      error: (error) => {
+        console.error('Error loading appointments:', error);
+        // Keep empty array on error
+        this.appointments = [];
       }
     });
   }
@@ -380,7 +411,7 @@ export class DashboardComponent implements OnInit {
       memberName: memberName,
       date: '',
       time: '',
-      service: '',
+      serviceName: '',
       pickupDrop: false,
       address: '',
       notes: '',
@@ -395,14 +426,14 @@ export class DashboardComponent implements OnInit {
   }
 
   saveAppointment() {
-    if (this.appointmentForm.service && this.appointmentForm.date && this.appointmentForm.time) {
+    if (this.appointmentForm.serviceName && this.appointmentForm.date && this.appointmentForm.time) {
       // Prepare appointment data for backend API
       const appointmentData = {
         appointmentType: this.appointmentForm.type!,
         memberId: this.appointmentForm.type === 'family' ? this.appointmentForm.memberId! : null,
         petId: this.appointmentForm.type === 'pet' ? this.appointmentForm.memberId! : null,
         memberName: this.appointmentForm.memberName!,
-        appointmentService: this.appointmentForm.service!,
+        appointmentService: this.appointmentForm.serviceName!,
         appointmentDate: this.appointmentForm.date!,
         appointmentTime: this.appointmentForm.time!,
         pickupDrop: this.appointmentForm.pickupDrop ? 'Y' : 'N',
@@ -416,21 +447,8 @@ export class DashboardComponent implements OnInit {
         next: (response) => {
           console.log('Appointment booked successfully:', response);
           
-          // Add to local appointments array for immediate UI update
-          const newAppointment: Appointment = {
-            id: this.nextAppointmentId++,
-            type: this.appointmentForm.type!,
-            memberId: this.appointmentForm.memberId!,
-            memberName: this.appointmentForm.memberName!,
-            service: this.appointmentForm.service!,
-            date: this.appointmentForm.date!,
-            time: this.appointmentForm.time!,
-            pickupDrop: this.appointmentForm.pickupDrop || false,
-            address: this.appointmentForm.address || '',
-            notes: this.appointmentForm.notes || '',
-            status: 'scheduled'
-          };
-          this.appointments.push(newAppointment);
+          // Reload appointments from API to get updated list
+          this.loadAppointments();
           
           this.closeAppointmentModal();
           alert('Appointment scheduled successfully!');
@@ -461,7 +479,19 @@ export class DashboardComponent implements OnInit {
   }
 
   getUpcomingAppointments() {
-    return this.appointments.filter(a => a.status === 'scheduled' || a.status === 'checked-in' || a.status === 'in-progress').slice(0, 5);
+    console.log('Total appointments:', this.appointments.length);
+    console.log('All appointments:', this.appointments);
+    
+    // Filter appointments that are not completed or cancelled
+    const upcomingAppointments = this.appointments.filter(a => 
+      a.status !== 'completed' && 
+      a.status !== 'cancelled'
+    );
+    
+    console.log('Upcoming appointments after filter:', upcomingAppointments.length);
+    console.log('Filtered appointments:', upcomingAppointments);
+    
+    return upcomingAppointments;
   }
 
   getCurrentDate(): string {
@@ -613,90 +643,7 @@ export class DashboardComponent implements OnInit {
     // Remove sample pets - will be loaded from API
     this.pets = [];
 
-    // Add some sample appointments for demonstration
-    this.appointments = [
-      {
-        id: this.nextAppointmentId++,
-        type: 'family',
-        memberId: 1,
-        memberName: 'Sarah Doe',
-        service: 'Elder Day Care',
-        date: '2025-07-25',
-        time: '09:00',
-        pickupDrop: true,
-        address: '123 Main St',
-        status: 'completed',
-        checkInTime: '8:55 AM',
-        checkOutTime: '5:10 PM',
-        adminNotes: 'Had a wonderful day participating in art therapy and social activities. Very cooperative and engaged with other participants.',
-        photos: [
-          {
-            id: 1,
-            url: '/assets/sample-care-photo1.jpg',
-            description: 'Participating in art therapy session',
-            uploadedAt: '2025-07-25T10:30:00Z',
-            uploadedBy: 'Care Staff - Maria'
-          },
-          {
-            id: 2,
-            url: '/assets/sample-care-photo2.jpg',
-            description: 'Lunch time with friends',
-            uploadedAt: '2025-07-25T12:15:00Z',
-            uploadedBy: 'Care Staff - John'
-          }
-        ],
-        feedback: {
-          rating: 5,
-          comment: 'Excellent service! Very caring staff.',
-          givenAt: '2025-07-25T18:00:00Z'
-        }
-      },
-      {
-        id: this.nextAppointmentId++,
-        type: 'family',
-        memberId: 2,
-        memberName: 'Emma Doe',
-        service: 'After School Care',
-        date: '2025-07-28',
-        time: '15:30',
-        pickupDrop: false,
-        status: 'completed',
-        checkInTime: '3:25 PM',
-        checkOutTime: '6:00 PM',
-        adminNotes: 'Completed homework on time. Enjoyed recreational activities and made new friends during playtime.',
-        photos: [
-          {
-            id: 3,
-            url: '/assets/sample-school-photo.jpg',
-            description: 'Homework completion session',
-            uploadedAt: '2025-07-28T16:00:00Z',
-            uploadedBy: 'Care Staff - Sarah'
-          }
-        ]
-      },
-      {
-        id: this.nextAppointmentId++,
-        type: 'pet',
-        memberId: 1,
-        memberName: 'Buddy',
-        service: 'Pet Day Care',
-        date: '2025-08-02',
-        time: '08:00',
-        pickupDrop: true,
-        address: '123 Main St',
-        status: 'in-progress',
-        checkInTime: '7:55 AM',
-        adminNotes: 'Very energetic today! Currently enjoying outdoor play time with other dogs. Had a healthy breakfast.',
-        photos: [
-          {
-            id: 4,
-            url: '/assets/sample-pet-photo.jpg',
-            description: 'Morning playtime in the yard',
-            uploadedAt: '2025-08-02T09:30:00Z',
-            uploadedBy: 'Pet Care Staff - Mike'
-          }
-        ]
-      }
-    ];
+    // Remove sample appointments - will be loaded from API
+    this.appointments = [];
   }
 }

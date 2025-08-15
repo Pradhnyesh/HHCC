@@ -146,8 +146,8 @@
             <div class="appointment-header">
               <h3 class="appointment-member">{{appointment.memberName}}</h3>
               <div class="appointment-badges">
-                <span class="appointment-type-badge" [class.family-badge]="appointment.type === 'family'" [class.pet-badge]="appointment.type === 'pet'">
-                  {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
+                <span class="appointment-type-badge" [class.family-badge]="appointment.type.toLowerCase() === 'family'" [class.pet-badge]="appointment.type.toLowerCase() === 'pet'">
+                  {{appointment.type.toLowerCase() === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
                 </span>
                 <span class="status-badge" [class]="getStatusBadgeClass(appointment.status)">
                   {{appointment.status | titlecase}}
@@ -155,7 +155,7 @@
               </div>
             </div>
             <div class="appointment-details">
-              <p class="appointment-service">{{appointment.service}}</p>
+              <p class="appointment-service">{{appointment.serviceName}}</p>
               <div class="appointment-datetime">
                 <span class="appointment-date">📅 {{appointment.date}}</span>
                 <span class="appointment-time">🕐 {{appointment.time}}</span>
@@ -199,7 +199,7 @@
           <select 
             id="service" 
             name="service" 
-            [(ngModel)]="appointmentForm.service" 
+            [(ngModel)]="appointmentForm.serviceName" 
             required 
             class="form-control">
             <option value="" disabled>Select a service</option>
@@ -387,9 +387,9 @@
             <div class="history-info">
               <h3 class="history-member">{{appointment.memberName}}</h3>
               <span class="history-type-badge" 
-                    [class.family-badge]="appointment.type === 'family'" 
-                    [class.pet-badge]="appointment.type === 'pet'">
-                {{appointment.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
+                    [class.family-badge]="appointment.type.toLowerCase() === 'family'" 
+                    [class.pet-badge]="appointment.type.toLowerCase() === 'pet'">
+                {{appointment.type.toLowerCase() === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{appointment.type}}
               </span>
             </div>
             <span class="status-badge" [class]="getStatusBadgeClass(appointment.status)">
@@ -398,7 +398,7 @@
           </div>
           
           <div class="history-details">
-            <p class="history-service">{{appointment.service}}</p>
+            <p class="history-service">{{appointment.serviceName}}</p>
             <div class="history-datetime">
               <span class="history-date">📅 {{appointment.date}}</span>
               <span class="history-time">🕐 {{appointment.time}}</span>
@@ -472,7 +472,7 @@
     
     <div class="modal-body">
       <div class="feedback-appointment-info" *ngIf="selectedAppointmentForFeedback">
-        <h3>{{selectedAppointmentForFeedback.service}}</h3>
+        <h3>{{selectedAppointmentForFeedback.serviceName}}</h3>
         <p>{{selectedAppointmentForFeedback.memberName}} • {{selectedAppointmentForFeedback.date}}</p>
       </div>
 
@@ -675,7 +675,7 @@
         <div class="detail-grid">
           <div class="detail-item">
             <span class="detail-label">Service:</span>
-            <span class="detail-value">{{selectedAppointmentForView.service}}</span>
+            <span class="detail-value">{{selectedAppointmentForView.serviceName}}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Date & Time:</span>
@@ -684,8 +684,8 @@
           <div class="detail-item">
             <span class="detail-label">Type:</span>
             <span class="detail-value">
-              <span class="type-badge" [class.family-badge]="selectedAppointmentForView.type === 'family'" [class.pet-badge]="selectedAppointmentForView.type === 'pet'">
-                {{selectedAppointmentForView.type === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{selectedAppointmentForView.type | titlecase}}
+              <span class="type-badge" [class.family-badge]="selectedAppointmentForView.type.toLowerCase() === 'family'" [class.pet-badge]="selectedAppointmentForView.type.toLowerCase() === 'pet'">
+                {{selectedAppointmentForView.type.toLowerCase() === 'family' ? '👨‍👩‍👧‍👦' : '🐕'}} {{selectedAppointmentForView.type | titlecase}}
               </span>
             </span>
           </div>
