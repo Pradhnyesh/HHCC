@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AdminService } from '../../../services/admin.service';
 
 interface FamilyMember {
   id: number;
@@ -182,7 +183,7 @@ export class AdminComponent implements OnInit, OnDestroy {
     '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
   ];
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private adminService: AdminService) {
     this.loadSampleData();
     this.applyFilters();
     this.calculateStats();
@@ -712,77 +713,60 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   // Tour Request Management Methods
   loadTourRequests() {
-    // Sample tour requests - replace with actual API call
-    this.tourRequests = [
-      {
-        id: 1,
-        firstName: 'Jennifer',
-        lastName: 'Martinez',
-        email: 'jennifer.martinez@email.com',
-        phone: '(555) 123-4567',
-        serviceInterest: 'Child Day Care',
-        preferredDate: '2025-08-05',
-        preferredTime: '10:00 AM',
-        numberOfPeople: 2,
-        specialRequests: 'Would like to see the infant care area specifically.',
-        contactMethod: 'email',
-        status: 'pending',
-        submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+    // Call admin service to get all tours (which returns tour request data)
+    this.adminService.getAllTours().subscribe({
+      next: (tourData: any[]) => {
+        // Transform API response to match TourRequest interface
+        this.tourRequests = tourData.map((tour, index) => {
+          // Map API status to tour request status
+          let tourStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+          switch (tour.status?.toLowerCase()) {
+            case 'scheduled':
+              tourStatus = 'confirmed';
+              break;
+            case 'completed':
+              tourStatus = 'completed';
+              break;
+            case 'cancelled':
+              tourStatus = 'cancelled';
+              break;
+            default:
+              tourStatus = 'pending';
+          }
+
+          return {
+            id: index + 1, // Generate ID since it's not provided in response
+            firstName: tour.firstName || 'Unknown',
+            lastName: tour.lastName || 'Unknown',
+            email: tour.email || 'unknown@email.com',
+            phone: tour.phoneNumber || 'N/A',
+            serviceInterest: tour.serviceName || 'Not specified',
+            preferredDate: tour.preferredDate || '', // Keep original date format from API
+            preferredTime: tour.preferredTime || '',
+            numberOfPeople: parseInt(tour.people) || 1,
+            specialRequests: '', // Not provided in API response
+            contactMethod: 'email' as const, // Default to email
+            status: tourStatus,
+            submittedAt: tour.submittedTime || 'Recently', // Use the provided submittedTime
+            confirmedDate: tour.status?.toLowerCase() === 'scheduled' ? tour.preferredDate : undefined, // Keep original format
+            confirmedTime: tour.status?.toLowerCase() === 'scheduled' ? tour.preferredTime : undefined,
+            assignedStaff: undefined, // Not available in API response
+            cancellationReason: tour.status?.toLowerCase() === 'cancelled' ? 'Tour cancelled' : undefined,
+            notes: '' // Not provided in API response
+          };
+        });
+        
+        this.applyTourFilters();
+        this.calculateTourStats();
       },
-      {
-        id: 2,
-        firstName: 'Robert',
-        lastName: 'Chen',
-        email: 'robert.chen@email.com',
-        phone: '(555) 987-6543',
-        serviceInterest: 'Elder Day Care',
-        preferredDate: '2025-08-06',
-        preferredTime: '2:00 PM',
-        numberOfPeople: 3,
-        specialRequests: 'My mother has mobility issues, need wheelchair accessible tour.',
-        contactMethod: 'phone',
-        status: 'confirmed',
-        submittedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-        confirmedDate: '2025-08-06',
-        confirmedTime: '2:00 PM',
-        assignedStaff: 'Emily Davis - Elder Care Coordinator',
-        notes: 'Wheelchair accessible route planned'
-      },
-      {
-        id: 3,
-        firstName: 'Amanda',
-        lastName: 'Wilson',
-        email: 'amanda.wilson@email.com',
-        phone: '(555) 456-7890',
-        serviceInterest: 'Special Needs Care',
-        preferredDate: '2025-08-04',
-        preferredTime: '11:00 AM',
-        numberOfPeople: 2,
-        specialRequests: 'Our son has autism, would like to see sensory room.',
-        contactMethod: 'email',
-        status: 'cancelled',
-        submittedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-        cancellationReason: 'Scheduling conflict - family emergency',
-        notes: 'Offered to reschedule, family will contact us later'
-      },
-      {
-        id: 4,
-        firstName: 'Mark',
-        lastName: 'Thompson',
-        email: 'mark.thompson@email.com',
-        phone: '(555) 321-0987',
-        serviceInterest: 'Pet Day Care',
-        preferredDate: '2025-08-07',
-        preferredTime: '3:00 PM',
-        numberOfPeople: 1,
-        contactMethod: 'phone',
-        status: 'pending',
-        submittedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() // 4 hours ago
+      error: (error) => {
+        console.error('Error loading tour requests:', error);
+        // Fallback to empty array on error
+        this.tourRequests = [];
+        this.applyTourFilters();
+        this.calculateTourStats();
       }
-    ];
-    
-    this.applyTourFilters();
-    this.calculateTourStats();
+    });
   }
 
   applyTourFilters() {

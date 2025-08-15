@@ -349,7 +349,7 @@
               </td>
               <td class="datetime-cell">
                 <div class="datetime-info">
-                  <div class="date">📅 {{formatTourDate(tourRequest.preferredDate)}}</div>
+                  <div class="date">📅 {{tourRequest.preferredDate}}</div>
                   <div class="time">⏰ {{tourRequest.preferredTime}}</div>
                 </div>
               </td>
@@ -554,7 +554,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">Preferred Date:</span>
-            <span class="info-value">{{formatTourDate(selectedTourRequest.preferredDate)}}</span>
+            <span class="info-value">{{selectedTourRequest.preferredDate}}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Preferred Time:</span>
@@ -577,7 +577,7 @@
           </div>
           <div class="info-item" *ngIf="selectedTourRequest.confirmedDate">
             <span class="info-label">Confirmed Date:</span>
-            <span class="info-value">{{formatTourDate(selectedTourRequest.confirmedDate)}}</span>
+            <span class="info-value">{{selectedTourRequest.confirmedDate}}</span>
           </div>
           <div class="info-item" *ngIf="selectedTourRequest.confirmedTime">
             <span class="info-label">Confirmed Time:</span>
