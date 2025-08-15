@@ -58,6 +58,10 @@ export class DashboardComponent implements OnInit {
   pets: Pet[] = [];
   appointments: Appointment[] = [];
   
+  // Cached upcoming appointments to avoid repeated filtering
+  private _upcomingAppointments: Appointment[] = [];
+  private _lastAppointmentsLength = 0;
+  
   // Modal states
   showFamilyModal = false;
   showPetModal = false;
@@ -191,7 +195,13 @@ export class DashboardComponent implements OnInit {
       next: (response) => {
         console.log('Appointments loaded:', response);
         console.log('Number of appointments received:', response ? response.length : 0);
-        this.appointments = response || [];
+        
+        // Process appointments and convert pickupDrop from 'Y'/'N' to boolean
+        this.appointments = (response || []).map((appointment: any) => ({
+          ...appointment,
+          pickupDrop: appointment.pickupDrop === 'Y'
+        }));
+        console.log('Processed appointments:', this.appointments);
         
         // Log appointment details for debugging
         if (this.appointments.length > 0) {
@@ -479,19 +489,16 @@ export class DashboardComponent implements OnInit {
   }
 
   getUpcomingAppointments() {
-    console.log('Total appointments:', this.appointments.length);
-    console.log('All appointments:', this.appointments);
+    // Only recalculate if appointments array has changed
+    if (this.appointments.length !== this._lastAppointmentsLength) {
+      this._upcomingAppointments = this.appointments.filter(a => 
+        a.status !== 'completed' && 
+        a.status !== 'cancelled'
+      );
+      this._lastAppointmentsLength = this.appointments.length;
+    }
     
-    // Filter appointments that are not completed or cancelled
-    const upcomingAppointments = this.appointments.filter(a => 
-      a.status !== 'completed' && 
-      a.status !== 'cancelled'
-    );
-    
-    console.log('Upcoming appointments after filter:', upcomingAppointments.length);
-    console.log('Filtered appointments:', upcomingAppointments);
-    
-    return upcomingAppointments;
+    return this._upcomingAppointments;
   }
 
   getCurrentDate(): string {
