@@ -699,6 +699,15 @@ select.form-control {
   font-weight: 500;
 }
 
+.no-pickup-badge {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .appointment-notes {
   font-size: 0.9rem;
   color: #7f8c8d;

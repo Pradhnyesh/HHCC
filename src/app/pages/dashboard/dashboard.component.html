@@ -160,8 +160,9 @@
                 <span class="appointment-date">📅 {{appointment.date}}</span>
                 <span class="appointment-time">🕐 {{appointment.time}}</span>
               </div>
-              <div class="appointment-pickup" *ngIf="appointment.pickupDrop">
-                <span class="pickup-badge">🚗 Pickup & Drop Available</span>
+              <div class="appointment-pickup">
+                <span class="pickup-badge" *ngIf="appointment.pickupDrop">🚗 Pickup & Drop Available</span>
+                <span class="no-pickup-badge" *ngIf="!appointment.pickupDrop">🚗 Pickup & Drop Not Available</span>
               </div>
               <p class="appointment-notes" *ngIf="appointment.notes">📝 {{appointment.notes}}</p>
             </div>
@@ -403,8 +404,9 @@
               <span class="history-date">📅 {{appointment.date}}</span>
               <span class="history-time">🕐 {{appointment.time}}</span>
             </div>
-            <div class="history-pickup" *ngIf="appointment.pickupDrop">
-              <span class="pickup-badge">🚗 Pickup & Drop Service</span>
+            <div class="history-pickup">
+              <span class="pickup-badge" *ngIf="appointment.pickupDrop">🚗 Pickup & Drop Service</span>
+              <span class="no-pickup-badge" *ngIf="!appointment.pickupDrop">🚗 Pickup & Drop Not Available</span>
             </div>
           </div>
 
@@ -697,10 +699,11 @@
               </span>
             </span>
           </div>
-          <div class="detail-item" *ngIf="selectedAppointmentForView.pickupDrop">
+          <div class="detail-item">
             <span class="detail-label">Pickup & Drop:</span>
             <span class="detail-value">
-              <span class="pickup-badge">🚗 Available</span>
+              <span class="pickup-badge" *ngIf="selectedAppointmentForView.pickupDrop">🚗 Available</span>
+              <span class="no-pickup-badge" *ngIf="!selectedAppointmentForView.pickupDrop">🚗 Not Available</span>
             </span>
           </div>
           <div class="detail-item" *ngIf="selectedAppointmentForView.address">
