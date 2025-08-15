@@ -1066,7 +1066,7 @@
 
 .tour-requests-table th:nth-child(2), /* Contact */
 .tour-requests-table td:nth-child(2) {
-  width: 200px;
+  width: 280px; /* Increased width for better email display */
 }
 
 .tour-requests-table th:nth-child(3), /* Service Interest */
