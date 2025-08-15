@@ -66,7 +66,7 @@ interface TourRequest {
   specialRequests?: string;
   contactMethod: 'email' | 'phone';
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  submittedAt: string;
+  SubmittedTime: string;
   confirmedDate?: string;
   confirmedTime?: string;
   assignedStaff?: string;
@@ -747,7 +747,7 @@ export class AdminComponent implements OnInit, OnDestroy {
             specialRequests: '', // Not provided in API response
             contactMethod: 'email' as const, // Default to email
             status: tourStatus,
-            submittedAt: tour.submittedTime || 'Recently', // Use the provided submittedTime
+            SubmittedTime: tour.submittedTime || 'Recently', // Use the provided submittedTime
             confirmedDate: tour.status?.toLowerCase() === 'scheduled' ? tour.preferredDate : undefined, // Keep original format
             confirmedTime: tour.status?.toLowerCase() === 'scheduled' ? tour.preferredTime : undefined,
             assignedStaff: undefined, // Not available in API response
