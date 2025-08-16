@@ -17,4 +17,8 @@ export class AdminService {
     return this.http.patch(`http://localhost:8080/admin/updateBookedTour/${tourId}`, { status }, { responseType: 'text' });
   }
 
+  getAllAppointments(): Observable<any> {
+    return this.http.get('http://localhost:8080/admin/getAppointments', { responseType: 'json' });
+  }
+
 }

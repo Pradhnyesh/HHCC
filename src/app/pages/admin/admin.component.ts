@@ -184,206 +184,80 @@ export class AdminComponent implements OnInit, OnDestroy {
   ];
 
   constructor(private router: Router, private adminService: AdminService) {
-    this.loadSampleData();
-    this.applyFilters();
-    this.calculateStats();
+    // Initialize with empty data - actual data will be loaded in ngOnInit
   }
 
-  loadSampleData() {
-    // Sample appointments data for admin view with various dates for testing time periods
-    this.appointments = [
-      {
-        id: 1,
-        type: 'family',
-        memberId: 1,
-        memberName: 'Sarah Doe',
-        service: 'Elder Day Care',
-        date: '2025-07-25',
-        time: '09:00',
-        pickupDrop: true,
-        address: '123 Main St, City, State',
-        status: 'completed',
-        userInfo: {
-          userName: 'John Doe',
-          userEmail: 'john.doe@example.com',
-          userPhone: '+1 (555) 123-4567'
-        },
-        feedback: {
-          rating: 5,
-          comment: 'Excellent service! Very caring staff.',
-          givenAt: '2025-07-25T18:00:00Z'
-        }
+  loadAppointments() {
+    // Call admin service to get all appointments
+    this.adminService.getAllAppointments().subscribe({
+      next: (appointmentData: any[]) => {
+        console.log('Raw appointment data from API:', appointmentData);
+        
+        // Transform API response to match Appointment interface
+        this.appointments = appointmentData.map((appointment, index) => {
+          // Map API status to appointment status (handle case variations)
+          let appointmentStatus: 'scheduled' | 'completed' | 'cancelled';
+          const status = appointment.status?.toLowerCase();
+          switch (status) {
+            case 'scheduled':
+              appointmentStatus = 'scheduled';
+              break;
+            case 'completed':
+              appointmentStatus = 'completed';
+              break;
+            case 'cancelled':
+              appointmentStatus = 'cancelled';
+              break;
+            default:
+              appointmentStatus = 'scheduled'; // Default fallback
+          }
+
+          // Map API type to appointment type (handle case variations)
+          let appointmentType: 'family' | 'pet';
+          const type = appointment.type?.toLowerCase();
+          console.log(`Processing appointment ${index}: API type = "${appointment.type}", lowercase = "${type}"`);
+          
+          if (type === 'family' || type === 'pet') {
+            appointmentType = type;
+          } else {
+            // Default to 'family' but log what we received
+            console.log(`Unknown appointment type "${appointment.type}" for appointment ${index}, defaulting to 'family'`);
+            appointmentType = 'family';
+          }
+
+          return {
+            id: appointment.appointmentId || index + 1, // Use appointmentId from API response
+            type: appointmentType,
+            memberId: appointment.appointmentId || 0, // Use appointmentId as memberId fallback
+            memberName: appointment.memberName || 'Unknown',
+            service: appointment.service || 'Not specified',
+            date: appointment.date || '', // API already provides in correct format (YYYY-MM-DD)
+            time: appointment.time?.substring(0, 5) || '', // Convert HH:MM:SS to HH:MM
+            pickupDrop: appointment.pickup === 'Y' || appointment.pickup === 'y', // Convert Y/N to boolean
+            address: '', // Not provided in API response
+            notes: '', // Not provided in API response
+            status: appointmentStatus,
+            feedback: undefined, // Not provided in API response
+            userInfo: {
+              userName: appointment.userName || 'Unknown User',
+              userEmail: appointment.userEmail || 'unknown@email.com',
+              userPhone: appointment.userPhone || undefined
+            }
+          };
+        });
+        
+        console.log('Transformed appointments:', this.appointments);
+        this.applyFilters();
+        this.calculateStats();
       },
-      {
-        id: 2,
-        type: 'family',
-        memberId: 2,
-        memberName: 'Emma Doe',
-        service: 'After School Care',
-        date: '2025-08-01', // Today
-        time: '15:30',
-        pickupDrop: false,
-        status: 'scheduled',
-        userInfo: {
-          userName: 'John Doe',
-          userEmail: 'john.doe@example.com',
-          userPhone: '+1 (555) 123-4567'
-        }
-      },
-      {
-        id: 3,
-        type: 'pet',
-        memberId: 1,
-        memberName: 'Buddy',
-        service: 'Pet Day Care',
-        date: '2025-08-02',
-        time: '08:00',
-        pickupDrop: true,
-        address: '123 Main St, City, State',
-        status: 'scheduled',
-        notes: 'Friendly dog, loves treats',
-        userInfo: {
-          userName: 'John Doe',
-          userEmail: 'john.doe@example.com',
-          userPhone: '+1 (555) 123-4567'
-        }
-      },
-      {
-        id: 4,
-        type: 'family',
-        memberId: 3,
-        memberName: 'Robert Smith',
-        service: 'Medical Consultation',
-        date: '2025-08-01', // Today
-        time: '14:00',
-        pickupDrop: false,
-        status: 'scheduled',
-        userInfo: {
-          userName: 'Alice Smith',
-          userEmail: 'alice.smith@example.com',
-          userPhone: '+1 (555) 987-6543'
-        }
-      },
-      {
-        id: 5,
-        type: 'family',
-        memberId: 4,
-        memberName: 'Sophie Johnson',
-        service: 'Child Day Care',
-        date: '2025-07-30',
-        time: '07:30',
-        pickupDrop: true,
-        address: '456 Oak Ave, City, State',
-        status: 'completed',
-        userInfo: {
-          userName: 'Mike Johnson',
-          userEmail: 'mike.johnson@example.com',
-          userPhone: '+1 (555) 456-7890'
-        },
-        feedback: {
-          rating: 4,
-          comment: 'Good service, child was happy.',
-          givenAt: '2025-07-30T17:00:00Z'
-        }
-      },
-      {
-        id: 6,
-        type: 'family',
-        memberId: 5,
-        memberName: 'Mary Wilson',
-        service: 'Respite Care',
-        date: '2025-07-28',
-        time: '10:00',
-        pickupDrop: false,
-        status: 'cancelled',
-        userInfo: {
-          userName: 'David Wilson',
-          userEmail: 'david.wilson@example.com',
-          userPhone: '+1 (555) 321-0987'
-        }
-      },
-      {
-        id: 7,
-        type: 'family',
-        memberId: 6,
-        memberName: 'Tom Brown',
-        service: 'Special Needs Care',
-        date: '2025-06-15', // Previous quarter
-        time: '11:00',
-        pickupDrop: true,
-        address: '789 Pine St, City, State',
-        status: 'completed',
-        userInfo: {
-          userName: 'Lisa Brown',
-          userEmail: 'lisa.brown@example.com',
-          userPhone: '+1 (555) 654-3210'
-        },
-        feedback: {
-          rating: 5,
-          comment: 'Outstanding care and support.',
-          givenAt: '2025-06-15T16:00:00Z'
-        }
-      },
-      {
-        id: 8,
-        type: 'pet',
-        memberId: 2,
-        memberName: 'Whiskers',
-        service: 'Pet Day Care',
-        date: '2024-12-20', // Previous year
-        time: '09:30',
-        pickupDrop: false,
-        status: 'completed',
-        userInfo: {
-          userName: 'Sarah Green',
-          userEmail: 'sarah.green@example.com',
-          userPhone: '+1 (555) 111-2222'
-        },
-        feedback: {
-          rating: 4,
-          comment: 'Cat was well taken care of.',
-          givenAt: '2024-12-20T17:00:00Z'
-        }
-      },
-      {
-        id: 9,
-        type: 'family',
-        memberId: 7,
-        memberName: 'Grace Taylor',
-        service: 'Health Checkup',
-        date: '2025-08-05', // This week
-        time: '10:00',
-        pickupDrop: false,
-        status: 'scheduled',
-        userInfo: {
-          userName: 'Mark Taylor',
-          userEmail: 'mark.taylor@example.com',
-          userPhone: '+1 (555) 333-4444'
-        }
-      },
-      {
-        id: 10,
-        type: 'family',
-        memberId: 8,
-        memberName: 'Oliver Davis',
-        service: 'Mental Health Support',
-        date: '2025-02-10', // Earlier this year but different quarter
-        time: '13:00',
-        pickupDrop: true,
-        address: '321 Cedar Ave, City, State',
-        status: 'completed',
-        userInfo: {
-          userName: 'Amanda Davis',
-          userEmail: 'amanda.davis@example.com',
-          userPhone: '+1 (555) 555-6666'
-        },
-        feedback: {
-          rating: 5,
-          comment: 'Very professional and caring service.',
-          givenAt: '2025-02-10T15:00:00Z'
-        }
+      error: (error) => {
+        console.error('Error loading appointments:', error);
+        // Fallback to empty array on error
+        this.appointments = [];
+        this.applyFilters();
+        this.calculateStats();
       }
-    ];
+    });
   }
 
   applyFilters() {
@@ -415,12 +289,27 @@ export class AdminComponent implements OnInit, OnDestroy {
       // Search query filter
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        return (
+        const matches = (
           appointment.memberName.toLowerCase().includes(query) ||
           appointment.service.toLowerCase().includes(query) ||
+          appointment.type.toLowerCase().includes(query) ||
           appointment.userInfo?.userName.toLowerCase().includes(query) ||
           appointment.userInfo?.userEmail.toLowerCase().includes(query)
         );
+        
+        // Debug logging for search
+        if (query === 'family') {
+          console.log(`Searching for "${query}" - Appointment ${appointment.id}:`, {
+            memberName: appointment.memberName,
+            service: appointment.service,
+            type: appointment.type,
+            userName: appointment.userInfo?.userName,
+            userEmail: appointment.userInfo?.userEmail,
+            matches: matches
+          });
+        }
+        
+        return matches;
       }
       
       return true;
@@ -590,10 +479,8 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   // Notification Methods
   ngOnInit() {
-    this.loadSampleData();
+    this.loadAppointments(); // Load appointments from API (this will call applyFilters and calculateStats)
     this.loadTourRequests();
-    this.applyFilters();
-    this.calculateStats();
     this.loadNotifications();
     this.setupClickOutsideListener();
   }
