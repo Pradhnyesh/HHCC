@@ -735,7 +735,7 @@ export class AdminComponent implements OnInit, OnDestroy {
           }
 
           return {
-            id: index + 1, // Generate ID since it's not provided in response
+            id: tour.tourId || index + 1, // Use actual tourId from API response, fallback to index + 1
             firstName: tour.firstName || 'Unknown',
             lastName: tour.lastName || 'Unknown',
             email: tour.email || 'unknown@email.com',
@@ -939,18 +939,54 @@ export class AdminComponent implements OnInit, OnDestroy {
 
   // Update tour status
   updateTourStatus(tourId: number, newStatus: string): void {
-    const tourIndex = this.tourRequests.findIndex(tour => tour.id === tourId);
-    if (tourIndex !== -1) {
-      this.tourRequests[tourIndex].status = newStatus as 'pending' | 'confirmed' | 'cancelled' | 'completed';
-      
-      // Update statistics
-      this.calculateTourStats();
-      
-      // Apply current filters
-      this.onTourFilterChange();
-      
-      console.log(`Tour ${tourId} status updated to ${newStatus}`);
-    }
+    // Call admin service to update tour status in backend
+    this.adminService.updateTourStatus(tourId, newStatus).subscribe({
+      next: (response) => {
+        console.log('Tour status updated successfully:', response);
+        
+        // Update local data after successful API call
+        const tourIndex = this.tourRequests.findIndex(tour => tour.id === tourId);
+        if (tourIndex !== -1) {
+          this.tourRequests[tourIndex].status = newStatus as 'pending' | 'confirmed' | 'cancelled' | 'completed';
+          
+          // Update statistics
+          this.calculateTourStats();
+          
+          // Apply current filters
+          this.onTourFilterChange();
+          
+          console.log(`Tour ${tourId} status updated to ${newStatus}`);
+          
+          // Show success message
+          alert(`Tour status successfully updated to ${newStatus}`);
+        }
+      },
+      error: (error) => {
+        console.error('Error updating tour status:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
+        
+        // More specific error message
+        let errorMessage = 'Failed to update tour status. ';
+        if (error.status === 0) {
+          errorMessage += 'Server is not reachable. Please check your connection.';
+        } else if (error.status === 404) {
+          errorMessage += 'Tour not found.';
+        } else if (error.status === 400) {
+          errorMessage += 'Invalid request data.';
+        } else if (error.status >= 500) {
+          errorMessage += 'Server error. Please try again later.';
+        } else {
+          errorMessage += `Error: ${error.status} - ${error.statusText}`;
+        }
+        
+        alert(errorMessage);
+      }
+    });
   }
 
   // Get minimum date (today) for tour confirmation

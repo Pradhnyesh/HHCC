@@ -13,4 +13,8 @@ export class AdminService {
     return this.http.get('http://localhost:8080/admin/getBookedTours', { responseType: 'json' });
   }
 
+  updateTourStatus(tourId: number, status: string): Observable<any> {
+    return this.http.patch(`http://localhost:8080/admin/updateBookedTour/${tourId}`, { status }, { responseType: 'text' });
+  }
+
 }
