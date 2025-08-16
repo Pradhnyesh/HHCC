@@ -49,7 +49,6 @@ export class ManageAppointmentComponent implements OnInit {
   
   // Filters
   statusFilter = 'all';
-  dateFilter = '';
   searchQuery = '';
   
   // Photo upload
@@ -138,12 +137,11 @@ export class ManageAppointmentComponent implements OnInit {
   applyFilters(): void {
     this.filteredAppointments = this.appointments.filter(appointment => {
       const matchesStatus = this.statusFilter === 'all' || appointment.status === this.statusFilter;
-      const matchesDate = !this.dateFilter || appointment.date === this.dateFilter;
       const matchesSearch = !this.searchQuery || 
         appointment.memberName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         appointment.service.toLowerCase().includes(this.searchQuery.toLowerCase());
       
-      return matchesStatus && matchesDate && matchesSearch;
+      return matchesStatus && matchesSearch;
     });
   }
 
@@ -343,10 +341,5 @@ export class ManageAppointmentComponent implements OnInit {
       minute: '2-digit',
       hour12: true
     });
-  }
-
-  getTodayDate(): string {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
   }
 }
