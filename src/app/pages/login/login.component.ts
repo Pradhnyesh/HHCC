@@ -16,13 +16,16 @@ export class LoginComponent {
   constructor(private userService: UserService, private router: Router) { }
 
   onSignIn() {
-    console.log('Login Form Data:', this.loginForm);
+    // console.log('Login Form Data:', this.loginForm);
     
     // Call loginUser method from UserService
     this.userService.loginUser(this.loginForm).subscribe({
       next: (response) => {
-        const userData = response; // Assuming response contains user data
-        console.log('Login successful:', response);
+        const userData = response.body;
+        const responseHeader = response.headers;
+        // console.log('Login successful:', responseHeader);
+        // console.log('Login successful:', responseHeader.get('Hhcc_id'));
+        this.userService.setUserToken(responseHeader.get('Hhcc_id') || '');
         //@ts-ignore
         sessionStorage.setItem('user', userData.email);
         //@ts-ignore

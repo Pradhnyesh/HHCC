@@ -7,6 +7,16 @@ import { Observable } from 'rxjs';
 })
 export class UserService {
 
+  private userToken: string = '';
+
+  public setUserToken(token: string) {
+    this.userToken = token;
+  }
+
+  public getUserToken(): string {
+    return this.userToken;
+  }
+
   constructor(private http: HttpClient) { }
 
   createUser(userData: any) {
@@ -14,7 +24,7 @@ export class UserService {
   }
 
   loginUser(loginData: any) : Observable<any> {
-    return this.http.post('http://localhost:8080/user/login', loginData, {responseType: 'json'});
+    return this.http.post('http://localhost:8080/user/login', loginData, {responseType: 'json', observe: 'response'});
   }
 
   contactUs(contactData: any) {
