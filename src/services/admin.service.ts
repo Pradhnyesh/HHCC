@@ -21,4 +21,8 @@ export class AdminService {
     return this.http.get('http://localhost:8080/admin/getAppointments', { responseType: 'json' });
   }
 
+  getTodaysAppointments(): Observable<any> {
+    return this.http.get('http://localhost:8080/admin/getTodaysAppointments', { responseType: 'json' });
+  }
+
 }
