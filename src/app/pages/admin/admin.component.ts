@@ -609,6 +609,7 @@ export class AdminComponent implements OnInit, OnDestroy {
           let tourStatus: 'pending' | 'confirmed' | 'cancelled' | 'completed';
           switch (tour.status?.toLowerCase()) {
             case 'scheduled':
+            case 'confirmed':
               tourStatus = 'confirmed';
               break;
             case 'completed':
